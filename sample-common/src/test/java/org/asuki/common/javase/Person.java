@@ -13,6 +13,6 @@ public class Person {
 
     @Getter
     @Setter
-    public String name;
+    private String name;
 
 }
