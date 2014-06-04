@@ -1,5 +1,6 @@
 package org.asuki.common.javase;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.System.out;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
@@ -16,10 +17,13 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import lombok.SneakyThrows;
 
 import org.testng.annotations.Test;
+
+import com.google.common.collect.ImmutableList;
 
 public class Javase8Test {
 
@@ -162,4 +166,47 @@ public class Javase8Test {
         optional.ifPresent((s) -> out.println(s.charAt(0)));
     }
 
+    @Test
+    public void testCustomFunction() {
+        // (from) -> Integer.valueOf(from)
+        Converter<String, Integer> valueOf = Integer::valueOf;
+
+        assertThat(valueOf.convert("123"), is(123));
+
+        MyClass instance = new MyClass();
+        Converter<String, String> startsWith = instance::startsWith;
+
+        assertThat(startsWith.convert("Java"), is("J"));
+    }
+
+    @Test
+    public void testStream() {
+
+        final List<String> list = ImmutableList.of("sa", "bb", "sc");
+
+        List<String> oldWay = newArrayList();
+        for (String str : list) {
+            if (str.startsWith("s")) {
+                oldWay.add(str.toUpperCase());
+            }
+        }
+
+        // s -> s.toUpperCase()
+        List<String> newWay = list.stream().filter(s -> s.startsWith("s"))
+                .map(String::toUpperCase).collect(Collectors.toList());
+
+        assertThat(oldWay, is(newWay));
+    }
+
+}
+
+@FunctionalInterface
+interface Converter<F, T> {
+    T convert(F from);
+}
+
+class MyClass {
+    public String startsWith(String s) {
+        return String.valueOf(s.charAt(0));
+    }
 }
