@@ -9,10 +9,16 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Getter
+@Setter
 public class Person {
 
-    @Getter
-    @Setter
     private String name;
+
+    private int age;
+
+    public Person(String name) {
+        this.name = name;
+    }
 
 }

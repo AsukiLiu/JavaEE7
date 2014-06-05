@@ -8,7 +8,10 @@ import static org.hamcrest.MatcherAssert.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.IntSummaryStatistics;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -79,6 +82,42 @@ public class Javase8Test {
     }
 
     @Test
+    public void testMapExtension() {
+
+        Map<Integer, String> map = new HashMap<>();
+        for (int i = 0; i < 10; i++) {
+            map.putIfAbsent(i, "val" + i);
+        }
+
+        map.forEach((key, value) -> out
+                .printf("Key: %s Value: %s ", key, value));
+
+        // Delete
+        map.computeIfPresent(4, (key, value) -> null);
+        assertThat(map.containsKey(4), is(false));
+
+        map.computeIfPresent(3, (key, value) -> value + key);
+        assertThat(map.get(3), is("val33"));
+
+        map.computeIfAbsent(3, value -> "aaa");
+        assertThat(map.get(3), is("val33"));
+
+        map.computeIfAbsent(12, value -> "aaa");
+        assertThat(map.get(12), is("aaa"));
+
+        map.remove(3, "val3");
+        assertThat(map.get(3), is("val33"));
+
+        map.remove(3, "val33");
+        assertThat(map.containsKey(3), is(false));
+
+        assertThat(map.getOrDefault(10, "not found"), is("not found"));
+
+        map.merge(9, "aaa", (value, newValue) -> value.concat(newValue));
+        assertThat(map.get(9), is("val9aaa"));
+    }
+
+    @Test
     public void testPredicate() {
 
         Predicate<String> predicate = (s) -> s.length() > 0;
@@ -110,16 +149,19 @@ public class Javase8Test {
 
     @Test
     public void testSupplier() {
+
+        final String expected = "Person(name=Andy, age=0)";
+
         Supplier<Person> personSupplier = Person::new;
         Person person = personSupplier.get();
         person.setName("Andy");
 
-        assertThat(person.toString(), is("Person(name=Andy)"));
+        assertThat(person.toString(), is(expected));
 
         PersonFactory<Person> personFactory = Person::new;
         person = personFactory.create("Andy");
 
-        assertThat(person.toString(), is("Person(name=Andy)"));
+        assertThat(person.toString(), is(expected));
     }
 
     @Test
@@ -129,7 +171,7 @@ public class Javase8Test {
 
         consumer.accept(person);
 
-        assertThat(person.toString(), is("Person(name=Mr. Andy)"));
+        assertThat(person.toString(), is("Person(name=Mr. Andy, age=0)"));
     }
 
     @Test
@@ -180,7 +222,7 @@ public class Javase8Test {
     }
 
     @Test
-    public void testStream() {
+    public void testStreamCaseA() {
 
         final List<String> list = ImmutableList.of("sa", "bb", "sc");
 
@@ -192,10 +234,65 @@ public class Javase8Test {
         }
 
         // s -> s.toUpperCase()
-        List<String> newWay = list.stream().filter(s -> s.startsWith("s"))
-                .map(String::toUpperCase).collect(Collectors.toList());
+        List<String> newWay = list.stream()
+                .filter(s -> s.startsWith("s"))
+                .map(String::toUpperCase)
+                .collect(Collectors.toList());
 
         assertThat(oldWay, is(newWay));
+
+        list.stream()
+            .map(String::toUpperCase)
+            .sorted((a, b) -> b.compareTo(a))
+            .forEach(out::println);
+
+        Predicate<String> predicate = (s) -> s.startsWith("b");
+
+        assertThat(list.stream().anyMatch(predicate), is(true));
+
+        assertThat(list.stream().allMatch(predicate), is(false));
+
+        assertThat(list.stream().noneMatch(predicate), is(false));
+
+        assertThat(list.stream().filter(predicate).count(), is(1L));
+
+        Optional<String> reduced = list.stream()
+                .sorted()
+                .reduce((s1, s2) -> s1 + "#" + s2);
+
+        reduced.ifPresent(out::println);
+
+        assertThat(reduced.get(), is("bb#sa#sc"));
+    }
+
+    @Test
+    public void testStreamCaseB() {
+
+        List<Person> persons = Arrays.asList(
+                new Person("Tom", 20), 
+                new Person("John", 40), 
+                new Person("John", 30));
+
+        String nameString = persons.stream()
+                .map((p) -> p.getName())
+                .collect(Collectors.joining(", "));
+
+        assertThat(nameString, is("Tom, John, John"));
+
+        List<String> names = persons.stream()
+                .map((p) -> p.getName())
+                .distinct()
+                .collect(Collectors.toList());
+
+        assertThat(names.size(), is(2));
+
+        IntSummaryStatistics stats = persons.stream()
+                .mapToInt((p) -> p.getAge())
+                .summaryStatistics();
+
+        assertThat(
+                stats.toString(),
+                is("IntSummaryStatistics{count=3, sum=90, min=20, average=30.000000, max=40}"));
     }
 
 }
