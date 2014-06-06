@@ -12,6 +12,7 @@
     <modules>
         <module>sample-common</module>
         <module>sample-web</module>
+        <module>sample-webservice</module>
     </modules>
 
     <properties>

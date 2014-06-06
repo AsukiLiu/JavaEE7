@@ -8,9 +8,8 @@
         <artifactId>javaee7</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>sample-web</artifactId>
-    <packaging>war</packaging>
-    <name>Maven Webapp Sample</name>
+    <artifactId>sample-webservice</artifactId>
+    <name>Webservice sample</name>
 
     <dependencies>
         <!-- Module -->
@@ -19,25 +18,10 @@
             <artifactId>sample-common</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.asuki</groupId>
-            <artifactId>sample-webservice</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <!-- Spec -->
-        <dependency>
-            <groupId>org.jboss.spec.javax.faces</groupId>
-            <artifactId>jboss-jsf-api_2.2_spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>javax.enterprise</groupId>
             <artifactId>cdi-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.spec.javax.servlet</groupId>
-            <artifactId>jboss-servlet-api_3.1_spec</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -46,8 +30,22 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.jboss.spec.javax.el</groupId>
-            <artifactId>jboss-el-api_3.0_spec</artifactId>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>jaxrs-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.spec.javax.batch</groupId>
+            <artifactId>jboss-batch-api_1.0_spec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.spec.javax.enterprise.concurrent</groupId>
+            <artifactId>jboss-concurrency-api_1.0_spec</artifactId>
         </dependency>
     </dependencies>
 
