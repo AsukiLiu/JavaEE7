@@ -5,6 +5,12 @@
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/test/java"/>
+        <dependent-module archiveName="sample-common-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/sample-common/sample-common">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="sample-webservice-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/sample-webservice/sample-webservice">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <property name="context-root" value="sample-web"/>
         <property name="java-output-path" value="/sample-web/target/classes"/>
     </wb-module>
