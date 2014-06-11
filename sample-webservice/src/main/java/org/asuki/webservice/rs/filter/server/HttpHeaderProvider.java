@@ -1,4 +1,4 @@
-package org.asuki.webservice.rs.provider;
+package org.asuki.webservice.rs.filter.server;
 
 import java.io.IOException;
 import javax.ws.rs.container.ContainerRequestContext;

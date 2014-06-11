@@ -1,4 +1,4 @@
-package org.asuki.webservice.rs.provider;
+package org.asuki.webservice.rs.filter.server;
 
 import static java.lang.String.format;
 
@@ -17,13 +17,14 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
+import org.asuki.webservice.rs.annotation.Tracked;
 import org.slf4j.Logger;
 
 import com.google.common.base.Joiner;
 
 @Tracked
 @Provider
-public class TrackProvider implements ContainerRequestFilter,
+public class CustomContainerFilter implements ContainerRequestFilter,
         ContainerResponseFilter {
 
     @Inject
@@ -44,6 +45,8 @@ public class TrackProvider implements ContainerRequestFilter,
     }
 
     private void log(ContainerRequestContext requestContext) {
+
+        log.info(requestContext.getHeaderString("Authorization"));
 
         SecurityContext securityContext = requestContext.getSecurityContext();
         String authentication = securityContext.getAuthenticationScheme();

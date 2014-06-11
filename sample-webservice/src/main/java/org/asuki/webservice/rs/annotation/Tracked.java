@@ -1,4 +1,4 @@
-package org.asuki.webservice.rs.provider;
+package org.asuki.webservice.rs.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

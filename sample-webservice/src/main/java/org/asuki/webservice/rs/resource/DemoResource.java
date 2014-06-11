@@ -14,6 +14,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -42,6 +43,12 @@ public class DemoResource extends BaseResource {
     @GET
     @Path("{id}")
     public Bean getById(@PathParam("id") String id) {
+        return savedBeans.get(id);
+    }
+
+    @GET
+    @Path("query")
+    public Bean queryById(@QueryParam("id") String id) {
         return savedBeans.get(id);
     }
 

@@ -8,6 +8,7 @@ import java.net.URI;
 
 import org.asuki.webservice.rs.entity.Bean;
 import org.asuki.webservice.rs.entity.RoastType;
+import org.asuki.webservice.rs.filter.client.CustomClientFilter;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -35,10 +36,11 @@ public class DemoResourceTest {
 
     @BeforeMethod
     public void init() {
-        client = ClientBuilder.newClient();
+        client = ClientBuilder.newClient().register(new CustomClientFilter("andy", "1234"));
         root = client.target("http://localhost:8080/sample-web/rs/demo");
     }
 
+    @SneakyThrows
     @Test
     public void testCrud() {
 
@@ -54,6 +56,17 @@ public class DemoResourceTest {
         // @GET
         Bean result = root.path(bean.getName()).request(MEDIA_TYPE)
                 .get(Bean.class);
+        assertThat(result, is(bean));
+
+        result = root.path("query").queryParam("id", bean.getName())
+                .request(MEDIA_TYPE).get(Bean.class);
+        assertThat(result, is(bean));
+
+        Future<Bean> future = root.path("query")
+                .queryParam("id", bean.getName()).request(MEDIA_TYPE).async()
+                .get(Bean.class);
+
+        result = future.get(3, TimeUnit.SECONDS);
         assertThat(result, is(bean));
 
         // @GET
@@ -116,7 +129,7 @@ public class DemoResourceTest {
     }
 
     @Test
-    public void template() throws Exception {
+    public void testUri() throws Exception {
 
         String rootPath = root.getUri().getPath();
 
