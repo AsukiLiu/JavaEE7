@@ -20,6 +20,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import org.asuki.webservice.rs.entity.Bean;
+import org.asuki.webservice.rs.entity.RoastType;
 
 @ApplicationScoped
 @Path("demo")
@@ -61,6 +62,17 @@ public class DemoResource extends BaseResource {
 
         final URI id = URI.create(bean.getName());
         return Response.created(id).build();
+    }
+
+    @GET
+    @Path("link")
+    public Response getLink() {
+
+        Bean bean = new Bean("andy", RoastType.DARK, "coffee");
+
+        return Response.ok(bean)
+                .link("http://localhost:8080/sample-web/rs/demo/link", "next")
+                .build();
     }
 
     @DELETE

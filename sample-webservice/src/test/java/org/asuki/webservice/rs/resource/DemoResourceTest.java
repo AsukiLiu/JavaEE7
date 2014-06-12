@@ -22,6 +22,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.Link;
 import javax.ws.rs.core.Response;
 
 import lombok.SneakyThrows;
@@ -36,7 +37,8 @@ public class DemoResourceTest {
 
     @BeforeMethod
     public void init() {
-        client = ClientBuilder.newClient().register(new CustomClientFilter("andy", "1234"));
+        client = ClientBuilder.newClient().register(
+                new CustomClientFilter("andy", "1234"));
         root = client.target("http://localhost:8080/sample-web/rs/demo");
     }
 
@@ -141,6 +143,27 @@ public class DemoResourceTest {
         // @formatter:on
 
         assertThat(uri.getPath(), is(rootPath + "/api/rs"));
+    }
+
+    @Test
+    public void testHypermedia() {
+
+        Response response = root.path("link").request(MEDIA_TYPE).get();
+        final String header = "<http://localhost:8080/sample-web/rs/demo/link>; rel=\"next\"";
+        final String entity = "Bean(name=andy, type=DARK, blend=coffee)";
+        final int status = 200;
+
+        assertThat(response.getHeaderString("Link"), is(header));
+        assertThat(response.readEntity(Bean.class).toString(), is(entity));
+        assertThat(response.getStatus(), is(status));
+
+        Link link = response.getLink("next");
+
+        response = client.target(link).request(MEDIA_TYPE).header("x-id", "X001").get();
+
+        assertThat(response.getHeaderString("Link"), is(header));
+        assertThat(response.readEntity(Bean.class).toString(), is(entity));
+        assertThat(response.getStatus(), is(status));
     }
 
     private static Entity<Bean> createEntity() {
