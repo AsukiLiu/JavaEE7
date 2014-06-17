@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -18,13 +19,19 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.asuki.webservice.rs.entity.Bean;
+import org.asuki.webservice.rs.entity.PagingParams;
 import org.asuki.webservice.rs.entity.RoastType;
+import org.slf4j.Logger;
 
 @ApplicationScoped
 @Path("demo")
 public class DemoResource extends BaseResource {
+
+    @Inject
+    private Logger log;
 
     @Context
     private ResourceContext rc;
@@ -39,6 +46,26 @@ public class DemoResource extends BaseResource {
     @GET
     public Collection<Bean> allBeans() {
         return savedBeans.values();
+    }
+
+    // page?offset=20&limit=50
+    @Path("page")
+    @GET
+    public PagingParams getPaging(@QueryParam("offset") Integer offset,
+            @QueryParam("limit") Integer limit, @Context UriInfo uriInfo,
+            @Context ResourceContext rc) {
+
+        log.info("Offset: " + offset);
+        log.info("Limit: " + limit);
+
+        log.info("Offset: " + uriInfo.getQueryParameters().getFirst("offset"));
+        log.info("Limit: " + uriInfo.getQueryParameters().getFirst("limit"));
+
+        PagingParams params = rc.getResource(PagingParams.class);
+        log.info("Offset: " + params.getOffset());
+        log.info("Limit: " + params.getLimit());
+
+        return params;
     }
 
     @GET
