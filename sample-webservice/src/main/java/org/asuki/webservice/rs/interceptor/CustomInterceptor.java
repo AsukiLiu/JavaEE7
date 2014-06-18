@@ -24,6 +24,8 @@ public class CustomInterceptor implements ReaderInterceptor, WriterInterceptor {
     public Object aroundReadFrom(ReaderInterceptorContext context)
             throws IOException, WebApplicationException {
 
+        log.info("ReaderInterceptor");
+
         String methodName = currentThread().getStackTrace()[1].getMethodName();
 
         Object entity = context.proceed();
@@ -36,6 +38,8 @@ public class CustomInterceptor implements ReaderInterceptor, WriterInterceptor {
     @Override
     public void aroundWriteTo(WriterInterceptorContext context)
             throws IOException, WebApplicationException {
+
+        log.info("WriterInterceptor");
 
         String methodName = currentThread().getStackTrace()[1].getMethodName();
 

@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
+import javax.inject.Inject;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -13,9 +14,14 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
+import org.slf4j.Logger;
+
 @Provider
 @Produces("text/csv")
 public class CsvMessageBodyWriter implements MessageBodyWriter<String[][]> {
+
+    @Inject
+    private Logger log;
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType,
@@ -37,6 +43,8 @@ public class CsvMessageBodyWriter implements MessageBodyWriter<String[][]> {
             MultivaluedMap<String, Object> httpHeaders,
             OutputStream outputStream) throws IOException,
             WebApplicationException {
+
+        log.info("MessageBodyWriter");
 
         try (PrintWriter out = new PrintWriter(outputStream)) {
             for (String[] row : t) {

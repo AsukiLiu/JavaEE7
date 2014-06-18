@@ -10,12 +10,15 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
+
+import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -25,6 +28,9 @@ public class ListMessageBodyWriter implements
         MessageBodyWriter<List<Map<String, String>>> {
 
     private static ObjectMapper mapper = new ObjectMapper();
+
+    @Inject
+    private Logger log;
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType,
@@ -47,6 +53,8 @@ public class ListMessageBodyWriter implements
             MultivaluedMap<String, Object> httpHeaders,
             OutputStream outputStream) throws IOException,
             WebApplicationException {
+
+        log.info("MessageBodyWriter");
 
         try (PrintWriter out = new PrintWriter(outputStream)) {
             out.print(mapper.writeValueAsString(t));

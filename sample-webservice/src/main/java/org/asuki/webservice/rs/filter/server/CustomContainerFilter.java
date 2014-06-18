@@ -46,6 +46,8 @@ public class CustomContainerFilter implements ContainerRequestFilter,
 
     private void log(ContainerRequestContext requestContext) {
 
+        log.info("ContainerRequestFilter");
+
         log.info(requestContext.getHeaderString("Authorization"));
 
         SecurityContext securityContext = requestContext.getSecurityContext();
@@ -72,6 +74,8 @@ public class CustomContainerFilter implements ContainerRequestFilter,
     }
 
     private void log(ContainerResponseContext responseContext) {
+
+        log.info("ContainerResponseFilter");
 
         MultivaluedMap<String, String> stringHeaders = responseContext
                 .getStringHeaders();
