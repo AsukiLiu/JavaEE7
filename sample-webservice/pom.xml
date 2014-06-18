@@ -13,6 +13,7 @@
 
     <properties>
         <org.jboss.resteasy>3.0.6.Final</org.jboss.resteasy>
+        <jackson.version>2.3.0</jackson.version>
     </properties>
 
     <dependencies>
@@ -69,6 +70,25 @@
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-jaxb-provider</artifactId>
             <version>${org.jboss.resteasy}</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Jackson -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

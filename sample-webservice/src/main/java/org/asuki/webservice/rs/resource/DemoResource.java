@@ -1,20 +1,26 @@
 package org.asuki.webservice.rs.resource;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Maps.newLinkedHashMap;
+import static java.util.Arrays.asList;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.net.URI;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
@@ -26,6 +32,7 @@ import org.asuki.webservice.rs.entity.PagingParams;
 import org.asuki.webservice.rs.entity.RoastType;
 import org.slf4j.Logger;
 
+//http://localhost:8080/sample-web/rs/demo
 @ApplicationScoped
 @Path("demo")
 public class DemoResource extends BaseResource {
@@ -112,4 +119,47 @@ public class DemoResource extends BaseResource {
     public AsyncResource asyn() {
         return rc.initResource(new AsyncResource());
     }
+
+    @GET
+    @Path("csv")
+    @Produces("text/csv")
+    public String[][] getCsv() {
+
+        String[] row = { "a", "bb", "ccc" };
+        String[][] table = { row, row, row };
+
+        return table;
+    }
+
+    // @formatter:off
+    /*
+    [
+        {
+            "Key1": "Value1",
+            "Key2": "Value2",
+            "Key3": "Value3"
+        },
+        {
+            "KeyA": "ValueA",
+            "KeyB": "ValueB",
+            "KeyC": "ValueC"
+        }
+    ]
+     */
+    // @formatter:on
+    @POST
+    @Path("list")
+    @Consumes({ APPLICATION_JSON })
+    @Produces({ APPLICATION_JSON })
+    public List<Map<String, String>> postList(List<Map<String, String>> input) {
+
+        log.info(input.toString());
+
+        Map<String, String> map = newLinkedHashMap();
+        map.put("key1", "value1");
+        map.put("key2", "value2");
+
+        return asList(map, map);
+    }
+
 }

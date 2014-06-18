@@ -8,7 +8,7 @@ import javax.ws.rs.ext.Provider;
 
 @Provider
 @PreMatching
-public class HttpHeaderProvider implements ContainerRequestFilter {
+public class HttpHeaderFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext)
