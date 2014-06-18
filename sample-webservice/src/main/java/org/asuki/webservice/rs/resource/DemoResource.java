@@ -102,7 +102,7 @@ public class DemoResource extends BaseResource {
     @Path("link")
     public Response getLink() {
 
-        Bean bean = new Bean("andy", RoastType.DARK, "coffee");
+        Bean bean = new Bean("andy", RoastType.DARK, 200);
 
         return Response.ok(bean)
                 .link("http://localhost:8080/sample-web/rs/demo/link", "next")

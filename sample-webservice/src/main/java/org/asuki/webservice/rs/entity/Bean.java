@@ -1,5 +1,6 @@
 package org.asuki.webservice.rs.entity;
 
+import javax.ws.rs.PathParam;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -21,8 +22,12 @@ import lombok.ToString;
 @EqualsAndHashCode
 public class Bean {
 
+    @PathParam("name")
     private String name;
+
     private RoastType type;
-    private String blend;
+
+    @PathParam("price")
+    private int price;
 
 }

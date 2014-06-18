@@ -4,7 +4,6 @@ import static com.google.common.base.Charsets.UTF_8;
 
 import java.io.IOException;
 
-import javax.inject.Inject;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.ClientResponseContext;
@@ -13,14 +12,14 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.xml.bind.DatatypeConverter;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import lombok.SneakyThrows;
 
 public class CustomClientFilter implements ClientRequestFilter,
         ClientResponseFilter {
 
-    @Inject
-    private Logger log;
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     private String user;
     private String password;

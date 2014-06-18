@@ -28,7 +28,7 @@ public class AsyncResource {
 
         bean.setType(RoastType.LIGHT);
         bean.setName(format("%s [%s]", bean.getName(), id));
-        bean.setBlend(bean.getBlend() + ", please.");
+        bean.setPrice(bean.getPrice() + 100);
 
         Response response = Response.ok(bean).header("x-id", id).build();
         ar.resume(response);

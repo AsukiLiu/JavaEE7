@@ -126,7 +126,7 @@ public class DemoResourceTest {
 
         assertThat(bean.getType(), is(RoastType.LIGHT));
         assertThat(bean.getName(), is("andy [X001]"));
-        assertThat(bean.getBlend(), is("coffee, please."));
+        assertThat(bean.getPrice(), is(300));
         assertThat(response.getHeaderString("x-id"), is(id));
     }
 
@@ -150,7 +150,7 @@ public class DemoResourceTest {
 
         Response response = root.path("link").request(MEDIA_TYPE).get();
         final String header = "<http://localhost:8080/sample-web/rs/demo/link>; rel=\"next\"";
-        final String entity = "Bean(name=andy, type=DARK, blend=coffee)";
+        final String entity = "Bean(name=andy, type=DARK, price=200)";
         final int status = 200;
 
         assertThat(response.getHeaderString("Link"), is(header));
@@ -167,7 +167,7 @@ public class DemoResourceTest {
     }
 
     private static Entity<Bean> createEntity() {
-        Bean origin = new Bean("andy", RoastType.DARK, "coffee");
+        Bean origin = new Bean("andy", RoastType.DARK, 200);
         return Entity.entity(origin, MEDIA_TYPE);
     }
 
