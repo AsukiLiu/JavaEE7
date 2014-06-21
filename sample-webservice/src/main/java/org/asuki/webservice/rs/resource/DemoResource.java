@@ -9,6 +9,7 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
 import java.net.URI;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,6 +28,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.asuki.webservice.rs.entity.Bean;
 import org.asuki.webservice.rs.entity.Names;
@@ -166,6 +168,35 @@ public class DemoResource extends BaseResource {
 
         return Response.ok().entity(new Bean("sample", RoastType.LIGHT, 300))
                 .type(TEXT_XML).build();
+    }
+
+    @Path("jacksonA")
+    @GET
+    @Produces(APPLICATION_JSON)
+    public Bean jacksonA() {
+        Bean bean = new Bean("sampleA", RoastType.LIGHT, 2_000);
+
+        return bean;
+    }
+
+    @Path("jacksonB")
+    @GET
+    @Produces(APPLICATION_JSON)
+    public Response jacksonB() {
+        Bean bean = new Bean("sampleB", RoastType.LIGHT, 2_000);
+
+        return Response.status(Status.OK).entity(bean).build();
+    }
+
+    @GET
+    @Path("url")
+    @Produces({ APPLICATION_JSON })
+    public Map<String, String> getUrl() {
+
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("title", "Web Develop Art");
+        map.put("url", "https://sites.google.com/site/webdevelopart/");
+        return map;
     }
 
 }
