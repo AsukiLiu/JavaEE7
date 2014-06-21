@@ -12,8 +12,8 @@
     <name>Webservice sample</name>
 
     <properties>
-        <org.jboss.resteasy>3.0.6.Final</org.jboss.resteasy>
-        <jackson.version>2.3.0</jackson.version>
+        <org.jboss.resteasy>3.0.8.Final</org.jboss.resteasy>
+        <jackson.version>2.3.2</jackson.version>
     </properties>
 
     <dependencies>
@@ -72,6 +72,18 @@
             <version>${org.jboss.resteasy}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jackson-provider</artifactId>
+            <version>${org.jboss.resteasy}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jackson2-provider</artifactId>
+            <version>${org.jboss.resteasy}</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- Jackson -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -88,6 +100,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
             <version>${jackson.version}</version>
             <scope>provided</scope>
         </dependency>

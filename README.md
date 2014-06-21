@@ -6,7 +6,7 @@ Demo of JavaEE7 technologies.
 ・JavaSE 8
 ・JavaEE 7
 
-・Wildfly 8.0.0
+・Wildfly 8.1.0
 ・Lombok
 ・TestNG
 ・Arquillian
