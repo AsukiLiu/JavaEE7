@@ -4,6 +4,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.util.Arrays.asList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.TEXT_XML;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
 import java.net.URI;
 import java.util.Collection;
@@ -25,10 +27,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
 import org.asuki.webservice.rs.entity.Bean;
-import org.asuki.webservice.rs.entity.PagingParams;
+import org.asuki.webservice.rs.entity.Names;
 import org.asuki.webservice.rs.entity.RoastType;
 import org.slf4j.Logger;
 
@@ -53,26 +54,6 @@ public class DemoResource extends BaseResource {
     @GET
     public Collection<Bean> allBeans() {
         return savedBeans.values();
-    }
-
-    // page?offset=20&limit=50
-    @Path("page")
-    @GET
-    public PagingParams getPaging(@QueryParam("offset") Integer offset,
-            @QueryParam("limit") Integer limit, @Context UriInfo uriInfo,
-            @Context ResourceContext rc) {
-
-        log.info("Offset: " + offset);
-        log.info("Limit: " + limit);
-
-        log.info("Offset: " + uriInfo.getQueryParameters().getFirst("offset"));
-        log.info("Limit: " + uriInfo.getQueryParameters().getFirst("limit"));
-
-        PagingParams params = rc.getResource(PagingParams.class);
-        log.info("Offset: " + params.getOffset());
-        log.info("Limit: " + params.getLimit());
-
-        return params;
     }
 
     @GET
@@ -160,6 +141,31 @@ public class DemoResource extends BaseResource {
         map.put("key2", "value2");
 
         return asList(map, map);
+    }
+
+    @Path("names")
+    @GET
+    @Produces(APPLICATION_JSON)
+    public Names getNames() {
+
+        return new Names(asList("Andy"));
+    }
+
+    @Path("responseA")
+    @GET
+    @Produces(TEXT_XML)
+    public Response responseA() {
+
+        return Response.status(INTERNAL_SERVER_ERROR)
+                .entity(new Names(asList("Andy", "Robby"))).build();
+    }
+
+    @Path("responseB")
+    @GET
+    public Response responseB() {
+
+        return Response.ok().entity(new Bean("sample", RoastType.LIGHT, 300))
+                .type(TEXT_XML).build();
     }
 
 }
