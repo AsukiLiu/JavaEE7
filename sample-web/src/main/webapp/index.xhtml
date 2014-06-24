@@ -8,18 +8,38 @@
 <h:head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link href="css/common.css" rel="stylesheet" />
+    <script src="js/common.js" />
     <title>Index page</title>
 </h:head>
 
 <body>
 
-    <h:form>
-        <h:messages />
+    <header>
+        <h1>Demo</h1>
+    </header>
 
-        <h:outputText value="This is test" />
+    <section>
+        <a href="#{request.contextPath}/rs/persons">Get all persons</a>
+    </section>
+    <section>
+        <form action="#{request.contextPath}/rs/persons" method="get">
+            ID: <input type="text" id="personId" name="id" /><br /> 
+            <input type="button" id="getPerson" value="Get person" />
+        </form>
+    </section>
+    <section>
+        <form action="#{request.contextPath}/rs/persons/create" method="post">
+            ID: <input type="text" name="id" /><br /> 
+            Name: <input type="text" name="name" /><br /> 
+            <input type="submit" value="Create person" />
+        </form>
+    </section>
 
-        <h:commandButton value="SEND" />
-    </h:form>
+    <footer>
+        <aside>
+            By <a href="https://sites.google.com/site/webdevelopart/">Andy</a>
+        </aside>
+    </footer>
 
 </body>
 

@@ -1,20 +1,33 @@
-package org.asuki.webservice.rs.resource;
+package org.asuki.webservice.rs;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
+import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
 
+import org.asuki.common.Resources;
 import org.asuki.webservice.rs.entity.Bean;
 import org.asuki.webservice.rs.entity.RoastType;
 import org.asuki.webservice.rs.filter.client.CustomClientFilter;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.shrinkwrap.api.ArchivePaths;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.EmptyAsset;
+import org.jboss.shrinkwrap.api.formatter.Formatters;
+import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Collection;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -27,19 +40,43 @@ import javax.ws.rs.core.Response;
 
 import lombok.SneakyThrows;
 
-public class DemoResourceTest {
+//NOTE  VM arguments: -Djava.util.logging.manager=org.jboss.logmanager.LogManager
+@RunWith(Arquillian.class)
+public class DemoResourceIT {
 
     private static final String MEDIA_TYPE = APPLICATION_XML;
+
+    private static final Logger LOG = Logger.getLogger(DemoResourceIT.class
+            .getName());
 
     private Client client;
     private WebTarget root;
     private boolean isCompleted;
 
-    @BeforeMethod
-    public void init() {
+    @ArquillianResource
+    private URL baseURL;
+
+    @Deployment
+    public static WebArchive createDeployment() throws IOException {
+        final WebArchive war = ShrinkWrap
+                .create(WebArchive.class, "test.war")
+                .addPackages(false, "org.asuki.webservice.rs",
+                        "org.asuki.webservice.rs.entity",
+                        "org.asuki.webservice.rs.resource")
+                .addClasses(Resources.class)
+                .addAsWebInfResource(EmptyAsset.INSTANCE,
+                        ArchivePaths.create("beans.xml"));
+
+        LOG.info(war.toString(Formatters.VERBOSE));
+
+        return war;
+    }
+
+    @Before
+    public void setup() {
         client = ClientBuilder.newClient().register(
                 new CustomClientFilter("andy", "1234"));
-        root = client.target("http://localhost:8080/sample-web/rs/demo");
+        root = client.target(baseURL + "rs/demo");
     }
 
     @SneakyThrows
@@ -159,7 +196,8 @@ public class DemoResourceTest {
 
         Link link = response.getLink("next");
 
-        response = client.target(link).request(MEDIA_TYPE).header("x-id", "X001").get();
+        response = client.target(link).request(MEDIA_TYPE)
+                .header("x-id", "X001").get();
 
         assertThat(response.getHeaderString("Link"), is(header));
         assertThat(response.readEntity(Bean.class).toString(), is(entity));

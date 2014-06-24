@@ -2,3 +2,9 @@ body {
     color: white;
     background-color: #222
 }
+
+section {
+    border: medium solid #ff00ff;
+    margin-bottom: 1em;
+    padding: 1em;
+}
