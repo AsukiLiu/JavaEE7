@@ -1,6 +1,6 @@
 package org.asuki.webservice.rs;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_XML;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
@@ -46,7 +46,7 @@ import lombok.SneakyThrows;
 @RunAsClient
 public class DemoResourceIT {
 
-    private static final String MEDIA_TYPE = APPLICATION_XML;
+    private static final String MEDIA_TYPE = APPLICATION_JSON;
 
     private static final Logger LOG = Logger.getLogger(DemoResourceIT.class
             .getName());
@@ -62,10 +62,10 @@ public class DemoResourceIT {
     public static WebArchive createDeployment() throws IOException {
         final WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "test.war")
-                .addPackages(false, "org.asuki.webservice.rs",
-                        "org.asuki.webservice.rs.entity",
-                        "org.asuki.webservice.rs.resource")
+                .addPackages(true, "org.asuki.webservice.rs")
                 .addClasses(Resources.class)
+                .addAsWebInfResource("META-INF/jboss-deployment-structure.xml",
+                        "jboss-deployment-structure.xml")
                 .addAsWebInfResource(EmptyAsset.INSTANCE,
                         ArchivePaths.create("beans.xml"));
 
@@ -89,7 +89,8 @@ public class DemoResourceIT {
         final Bean bean = entity.getEntity();
 
         // @POST
-        Response response = root.request().post(entity, Response.class);
+        Response response = root.request(MEDIA_TYPE).post(entity,
+                Response.class);
         assertThat(response.getStatus(), is(201));
 
         response.close();

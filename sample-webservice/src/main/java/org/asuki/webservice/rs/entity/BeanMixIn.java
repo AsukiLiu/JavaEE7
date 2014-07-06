@@ -5,10 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public abstract class BeanMixIn {
 
-    @JsonProperty("coffeeName")
-    public abstract String getName();
-
-    @JsonIgnore
-    public abstract String getPrice();
+//    @JsonProperty("coffeeName")
+//    public abstract String getName();
+//
+//    @JsonIgnore
+//    public abstract String getPrice();
 
 }

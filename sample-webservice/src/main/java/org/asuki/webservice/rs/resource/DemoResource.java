@@ -38,6 +38,8 @@ import org.slf4j.Logger;
 //http://localhost:8080/sample-web/rs/demo
 @ApplicationScoped
 @Path("demo")
+@Consumes({ APPLICATION_JSON })
+@Produces({ APPLICATION_JSON })
 public class DemoResource extends BaseResource {
 
     @Inject
@@ -132,8 +134,6 @@ public class DemoResource extends BaseResource {
     // @formatter:on
     @POST
     @Path("list")
-    @Consumes({ APPLICATION_JSON })
-    @Produces({ APPLICATION_JSON })
     public List<Map<String, String>> postList(List<Map<String, String>> input) {
 
         log.info(input.toString());
@@ -147,7 +147,6 @@ public class DemoResource extends BaseResource {
 
     @Path("names")
     @GET
-    @Produces(APPLICATION_JSON)
     public Names getNames() {
 
         return new Names(asList("Andy"));
@@ -172,7 +171,6 @@ public class DemoResource extends BaseResource {
 
     @Path("jacksonA")
     @GET
-    @Produces(APPLICATION_JSON)
     public Bean jacksonA() {
         Bean bean = new Bean("sampleA", RoastType.LIGHT, 2_000);
 
@@ -181,7 +179,6 @@ public class DemoResource extends BaseResource {
 
     @Path("jacksonB")
     @GET
-    @Produces(APPLICATION_JSON)
     public Response jacksonB() {
         Bean bean = new Bean("sampleB", RoastType.LIGHT, 2_000);
 
@@ -190,7 +187,6 @@ public class DemoResource extends BaseResource {
 
     @GET
     @Path("url")
-    @Produces({ APPLICATION_JSON })
     public Map<String, String> getUrl() {
 
         Map<String, String> map = new LinkedHashMap<>();
