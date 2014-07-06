@@ -4,12 +4,14 @@ import static org.asuki.common.dsl.builder.EdgeBuilderB.edge;
 import static org.asuki.common.dsl.builder.EdgeBuilderB.weight;
 import static org.asuki.common.dsl.builder.VertexBuilderB.from;
 import static org.asuki.common.dsl.builder.VertexBuilderB.to;
+import static org.asuki.common.dsl.fluent.Person.with;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
 import org.asuki.common.dsl.builder.GraphBuilderA;
 import org.asuki.common.dsl.builder.GraphBuilderB;
 import org.asuki.common.dsl.builder.GraphBuilderC;
+import org.asuki.common.dsl.fluent.Person;
 import org.testng.annotations.Test;
 
 public class DslTest {
@@ -68,6 +70,18 @@ public class DslTest {
 
         assertThat(graphA.toString(), is(graphB.toString()));
         assertThat(graphB.toString(), is(graphC.toString()));
+    }
+
+    @Test
+    public void testFluentBuilder() {
+
+        Person person1 = new Person();
+        person1.setFirstName("Asuki");
+        person1.setLastName("Liu");
+
+        Person person2 = with().firstName("Asuki").lastName("Liu").create();
+
+        assertThat(person1.toString(), is(person2.toString()));
     }
 
 }
