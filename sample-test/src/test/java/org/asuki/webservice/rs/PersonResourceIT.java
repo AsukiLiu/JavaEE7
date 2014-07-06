@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
@@ -40,6 +41,7 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 //NOTE  VM arguments: -Djava.util.logging.manager=org.jboss.logmanager.LogManager
 @RunWith(Arquillian.class)
+@RunAsClient
 public class PersonResourceIT {
 
     private static final Logger LOG = Logger.getLogger(PersonResourceIT.class
@@ -49,6 +51,7 @@ public class PersonResourceIT {
     private URL baseURL;
 
     private Client client;
+    private WebTarget root;
     private Response response;
     private String methodName;
 
@@ -70,6 +73,7 @@ public class PersonResourceIT {
     public void setup() {
         client = ClientBuilder.newBuilder().register(JacksonJsonProvider.class)
                 .build();
+        root = client.target(baseURL + "rs/persons");
     }
 
     @After
@@ -78,13 +82,11 @@ public class PersonResourceIT {
     }
 
     @Test
-    @RunAsClient
-    @InSequence(10)
+    @InSequence(1)
     public void shouldGetAllPersons() {
         methodName = currentThread().getStackTrace()[1].getMethodName();
 
-        response = client.target(baseURL + "rs/persons")
-                .request(APPLICATION_JSON).get();
+        response = root.request(APPLICATION_JSON).get();
         response.bufferEntity();
 
         assertEquals(emptyList(),
@@ -93,13 +95,12 @@ public class PersonResourceIT {
     }
 
     @Test
-    @RunAsClient
-    @InSequence(20)
+    @InSequence(2)
     public void shouldNotGetPerson() {
         methodName = currentThread().getStackTrace()[1].getMethodName();
 
         // @formatter:off
-        response = client.target(baseURL + "rs/persons/{id}")
+        response = root.path("{id}")
                 .resolveTemplate("id", "test")
                 .request(APPLICATION_JSON)
                 .header("Accept-Language", "en")
@@ -111,28 +112,25 @@ public class PersonResourceIT {
     }
 
     @Test
-    @RunAsClient
-    @InSequence(30)
+    @InSequence(3)
     public void shouldGetEmptyPerson() {
         methodName = currentThread().getStackTrace()[1].getMethodName();
 
-        response = client.target(baseURL + "rs/persons/{id}")
-                .resolveTemplate("id", "3").request(APPLICATION_JSON).get();
+        response = root.path("{id}").resolveTemplate("id", "3")
+                .request(APPLICATION_JSON).get();
         response.bufferEntity();
 
         assertEquals(null, response.readEntity(Person.class));
     }
 
     @Test
-    @RunAsClient
-    @InSequence(40)
+    @InSequence(4)
     public void shouldNotCreatePerson() {
         methodName = currentThread().getStackTrace()[1].getMethodName();
 
         Form form = new Form();
 
-        response = client.target(baseURL + "rs/persons/create")
-                .request(APPLICATION_JSON)
+        response = root.path("create").request(APPLICATION_JSON)
                 .post(Entity.entity(form, APPLICATION_FORM_URLENCODED));
         response.bufferEntity();
 
@@ -140,8 +138,7 @@ public class PersonResourceIT {
     }
 
     @Test
-    @RunAsClient
-    @InSequence(50)
+    @InSequence(5)
     public void shouldCreatePerson() {
         methodName = currentThread().getStackTrace()[1].getMethodName();
 
@@ -153,8 +150,7 @@ public class PersonResourceIT {
         form.param("id", String.valueOf(person.getId()));
         form.param("name", person.getName());
 
-        response = client.target(baseURL + "rs/persons/create")
-                .request(APPLICATION_JSON)
+        response = root.path("create").request(APPLICATION_JSON)
                 .post(Entity.entity(form, APPLICATION_FORM_URLENCODED));
         response.bufferEntity();
 

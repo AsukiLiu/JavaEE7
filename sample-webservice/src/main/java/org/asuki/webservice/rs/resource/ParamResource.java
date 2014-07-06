@@ -36,6 +36,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.asuki.webservice.rs.entity.Bean;
 import org.asuki.webservice.rs.entity.PagingParams;
+import org.asuki.webservice.rs.param.CustomParam;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -199,6 +200,12 @@ public class ParamResource extends BaseResource {
         String path = "Path : " + uriInfo.getPath();
 
         return join("\n", agent, path, mapToString(header.getRequestHeaders()));
+    }
+
+    @GET
+    @Path("converter")
+    public String converter(@QueryParam("input") CustomParam input) {
+        return "Converter: " + input.getValue();
     }
 
     private static String mapToString(Map<String, List<String>> map) {

@@ -13,6 +13,7 @@ import org.asuki.webservice.rs.entity.Bean;
 import org.asuki.webservice.rs.entity.RoastType;
 import org.asuki.webservice.rs.filter.client.CustomClientFilter;
 import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.ArchivePaths;
@@ -42,6 +43,7 @@ import lombok.SneakyThrows;
 
 //NOTE  VM arguments: -Djava.util.logging.manager=org.jboss.logmanager.LogManager
 @RunWith(Arquillian.class)
+@RunAsClient
 public class DemoResourceIT {
 
     private static final String MEDIA_TYPE = APPLICATION_XML;
