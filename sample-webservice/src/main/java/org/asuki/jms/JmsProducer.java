@@ -12,6 +12,7 @@ import javax.jms.ConnectionFactory;
 import javax.jms.JMSConnectionFactory;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Queue;
@@ -20,6 +21,10 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 import org.asuki.common.dsl.fluent.Person;
+import org.asuki.common.util.Function;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Path("producer")
 @Stateless
@@ -35,28 +40,36 @@ public class JmsProducer {
     @JMSConnectionFactory(TEST_CONNECTION)
     private JMSContext jmsContext;
 
-    @Path("jms11")
+    @Inject
+    private ObjectMapper objectMapper;
+
+    @Path("jms11/obj")
     @GET
     public String jms11Produce() {
-        String status = "Done";
 
-        try (Connection connection = connectionFactory.createConnection();
-                Session session = connection.createSession(false,
-                        AUTO_ACKNOWLEDGE);
-                MessageProducer producer = session.createProducer(queue);) {
+        Person person = createPerson();
 
-            Person person = createPerson();
-
+        Function<Session, Message, JMSException> createMessage = session -> {
             ObjectMessage objectMessage = session.createObjectMessage();
             objectMessage.setObject(person);
 
-            producer.send(objectMessage);
+            return objectMessage;
+        };
 
-        } catch (JMSException e) {
-            status = e.getMessage();
-        }
+        return sendMessage(createMessage);
+    }
 
-        return status;
+    @Path("jms11/json")
+    @GET
+    public String jms11ProduceByJackson() throws JsonProcessingException {
+
+        Person person = createPerson();
+        String text = objectMapper.writeValueAsString(person);
+
+        Function<Session, Message, JMSException> createMessage = session -> session
+                .createTextMessage(text);
+
+        return sendMessage(createMessage);
     }
 
     @Path("jms20")
@@ -67,6 +80,26 @@ public class JmsProducer {
         jmsContext.createProducer().send(queue, person);
 
         return "Done";
+    }
+
+    private String sendMessage(
+            Function<Session, Message, JMSException> createMessage) {
+        String status = "Done";
+
+        try (Connection connection = connectionFactory.createConnection();
+                Session session = connection.createSession(false,
+                        AUTO_ACKNOWLEDGE);
+                MessageProducer producer = session.createProducer(queue);) {
+
+            Message message = createMessage.apply(session);
+
+            producer.send(message);
+
+        } catch (JMSException e) {
+            status = e.getMessage();
+        }
+
+        return status;
     }
 
     private Person createPerson() {
