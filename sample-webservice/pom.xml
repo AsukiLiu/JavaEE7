@@ -94,6 +94,12 @@
             <version>${org.jboss.resteasy}</version>
             <scope>provided</scope>
         </dependency>
+        <!-- RxJava -->
+        <dependency>
+            <groupId>com.netflix.rxjava</groupId>
+            <artifactId>rxjava-core</artifactId>
+            <version>0.19.0</version>
+        </dependency>
     </dependencies>
 
 </project>
