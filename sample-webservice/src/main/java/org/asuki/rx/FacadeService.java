@@ -30,7 +30,11 @@ import rx.functions.Func2;
 @Path("facade")
 public class FacadeService {
 
-    private static final String BASE_URL = "http://localhost:8080/sample-web";
+    // For integration test
+    private static final String SUB_A_SERVICE = "http://localhost:8080/sub-a";
+    private static final String SUB_B_SERVICE = "http://localhost:8080/sub-b";
+
+    //private static final String BASE_URL = "http://localhost:8080/sample-web";
 
     @Inject
     private Logger log;
@@ -45,9 +49,9 @@ public class FacadeService {
     @PostConstruct
     private void initializeRest() {
         subAServiceTarget = ClientBuilder.newClient().target(
-                BASE_URL + "/rs/sub-a");
+                SUB_A_SERVICE + "/rs/sub-a");
         subBServiceTarget = ClientBuilder.newClient().target(
-                BASE_URL + "/rs/sub-b");
+                SUB_B_SERVICE + "/rs/sub-b");
     }
 
     @GET
