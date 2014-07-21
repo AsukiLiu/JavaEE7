@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 @WebServlet(urlPatterns = "/concurrency")
-public class ConcurrencyServlet extends HttpServlet {
+public class ConcurrencyHttpServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
