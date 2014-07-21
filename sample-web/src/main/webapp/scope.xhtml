@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="css/common.css" rel="stylesheet" />
+    <script src="js/common.js" />
+    <title>Scope test page</title>
+</h:head>
+<h:body>
+
+    <h:form id="requestForm">
+        <h:outputText value="Request Scope:" />
+        <br />
+        <h:outputLabel id="label" value="#{requestScopedBean.count}" />
+        <h:commandButton value="COUNT(action)"
+            action="#{requestScopedBean.countUp()}" />
+        <h:commandButton value="COUNT(actionListener)"
+            actionListener="#{requestScopedBean.countUp()}"
+            action="scope.xhtml" />
+        <p:commandButton value="COUNT(ajax)"
+            actionListener="#{requestScopedBean.countUp()}" ajax="true"
+            update=":requestForm:label" />
+    </h:form>
+
+    <h:form id="viewForm">
+        <h:outputText value="View Scope:" />
+        <br />
+        <h:outputLabel id="label" value="#{viewScopedBean.count}" />
+        <h:commandButton value="COUNT(action)"
+            action="#{viewScopedBean.countUp()}" />
+        <h:commandButton value="COUNT(actionListener)"
+            actionListener="#{viewScopedBean.countUp()}"
+            action="scope.xhtml" />
+        <p:commandButton value="COUNT(ajax)"
+            actionListener="#{viewScopedBean.countUp()}" ajax="true"
+            update=":viewForm:label" />
+    </h:form>
+
+    <h:form id="sessionForm">
+        <h:outputText value="Session Scope:" />
+        <br />
+        <h:outputLabel id="label" value="#{sessionScopedBean.count}" />
+        <h:commandButton value="COUNT(action)"
+            action="#{sessionScopedBean.countUp()}" />
+        <h:commandButton value="COUNT(actionListener)"
+            actionListener="#{sessionScopedBean.countUp()}"
+            action="scope.xhtml" />
+        <p:commandButton value="COUNT(ajax)"
+            actionListener="#{sessionScopedBean.countUp()}" ajax="true"
+            update=":sessionForm:label" />
+    </h:form>
+
+    <h:form id="applicationForm">
+        <h:outputText value="Application Scope:" />
+        <br />
+        <h:outputLabel id="label" value="#{applicationScopedBean.count}" />
+        <h:commandButton value="COUNT(action)"
+            action="#{applicationScopedBean.countUp()}" />
+        <h:commandButton value="COUNT(actionListener)"
+            actionListener="#{applicationScopedBean.countUp()}"
+            action="scope.xhtml" />
+        <p:commandButton value="COUNT(ajax)"
+            actionListener="#{applicationScopedBean.countUp()}"
+            ajax="true" update=":applicationForm:label" />
+    </h:form>
+
+</h:body>
+</html>
