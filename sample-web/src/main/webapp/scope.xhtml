@@ -41,6 +41,20 @@
             update=":viewForm:label" />
     </h:form>
 
+    <h:form id="customViewForm">
+        <h:outputText value="Custom View Scope:" />
+        <br />
+        <h:outputLabel id="label" value="#{customViewScopedBean.count}" />
+        <h:commandButton value="COUNT(action)"
+            action="#{customViewScopedBean.countUp()}" />
+        <h:commandButton value="COUNT(actionListener)"
+            actionListener="#{customViewScopedBean.countUp()}"
+            action="scope.xhtml" />
+        <p:commandButton value="COUNT(ajax)"
+            actionListener="#{customViewScopedBean.countUp()}"
+            ajax="true" update=":customViewForm:label" />
+    </h:form>
+
     <h:form id="sessionForm">
         <h:outputText value="Session Scope:" />
         <br />
