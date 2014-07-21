@@ -14,6 +14,8 @@
         <module>sample-web</module>
         <module>sample-webservice</module>
         <module>sample-test</module>
+        <module>sample-dao</module>
+        <module>sample-model</module>
     </modules>
 
     <properties>
