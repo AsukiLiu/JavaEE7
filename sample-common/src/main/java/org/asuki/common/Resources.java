@@ -2,6 +2,7 @@ package org.asuki.common;
 
 import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 
@@ -10,11 +11,11 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+@ApplicationScoped
 public class Resources {
 
     @Produces
     public Logger loggerProducer(InjectionPoint ip) {
-
         return LoggerFactory.getLogger(ip.getMember().getDeclaringClass());
     }
 

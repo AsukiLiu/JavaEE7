@@ -25,4 +25,8 @@
         <welcome-file>index.xhtml</welcome-file>
     </welcome-file-list>
 
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+
 </web-app>

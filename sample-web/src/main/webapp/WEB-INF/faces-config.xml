@@ -13,4 +13,8 @@
         </locale-config>
     </application>
 
+    <lifecycle>
+        <phase-listener>org.asuki.web.faces.listener.CustomPhaseListener</phase-listener>
+    </lifecycle>
+
 </faces-config>
