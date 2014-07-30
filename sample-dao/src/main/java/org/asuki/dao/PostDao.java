@@ -19,7 +19,7 @@ public class PostDao extends BaseDao<Post, Long> {
     }
 
     public List<Post> findAllPosts() {
-        return findAll("SELECT p FROM Post p ORDER BY p.createdDate DESC");
+        return findByQuery("SELECT p FROM Post p ORDER BY p.createdDate DESC");
     }
 
     @Transactional
