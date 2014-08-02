@@ -14,6 +14,8 @@ import org.asuki.dao.PostDao;
 import org.asuki.model.converter.UuidToBytesConverter;
 import org.asuki.model.entity.Comment;
 import org.asuki.model.entity.Post;
+import org.asuki.model.entity.CommentNegative;
+import org.asuki.model.entity.CommentPositive;
 import org.asuki.model.listener.BaseEntityListener;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -74,14 +76,16 @@ public class PostDaoIT {
     @Test
     @InSequence(1)
     public void testBulkCrud() {
+        final List<Long> ids = asList(1L, 2L);
+
         List<Post> posts = postDao.findAllPosts();
         assertThat(filter(posts, post -> !post.isApproved()).size(), is(2));
 
-        postDao.update(asList(1L, 2L));
+        postDao.update(ids);
         posts = postDao.findAllPosts();
         assertThat(filter(posts, post -> post.isApproved()).size(), is(2));
 
-        postDao.delete(asList(1L, 2L));
+        postDao.delete(ids);
         posts = postDao.findAllPosts();
         assertThat(posts.size(), is(0));
     }
@@ -89,7 +93,9 @@ public class PostDaoIT {
     @Test
     @InSequence(2)
     public void testEntityGraph() {
-        Post post = postDao.findById(3L);
+        final Long id = 3L;
+
+        Post post = postDao.findById(id);
         List<Comment> comments = asList(new Comment("content1").withPost(post),
                 new Comment("content2").withPost(post));
         post.setComments(comments);
@@ -97,18 +103,38 @@ public class PostDaoIT {
 
         PersistenceUnitUtil util = postDao.getPersistenceUnitUtil();
 
-        post = postDao.findById(3L);
+        post = postDao.findById(id);
 
         assertThat(util.isLoaded(post, "title"), is(true));
         assertThat(util.isLoaded(post, "body"), is(true));
         assertThat(util.isLoaded(post, "comments"), is(false));
 
-        post = postDao.findByIdWithGraph(3L);
+        post = postDao.findByIdWithGraph(id);
 
         assertThat(util.isLoaded(post, "title"), is(true));
         assertThat(util.isLoaded(post, "body"), is(true));
         assertThat(util.isLoaded(post, "comments"), is(true));
         out.println(post.toString());
+    }
+
+    @Test
+    @InSequence(3)
+    public void testInheritance() {
+        final Long id = 5L;
+
+        Post post = postDao.findByIdWithGraph(id);
+
+        CommentPositive commentP = new CommentPositive("Positive");
+        commentP.setPost(post);
+        CommentNegative commentN = new CommentNegative("Negative");
+        commentN.setPost(post);
+
+        post.getComments().add(commentP);
+        post.getComments().add(commentN);
+
+        postDao.edit(post);
+
+        assertThat(postDao.countCommentsById(id), is(2L));
     }
 
 }

@@ -44,14 +44,21 @@ public abstract class BaseDao<E, K> {
         return em.createQuery(query, getEntityClass()).getResultList();
     }
 
+    public long countByQuery(K key, String query) {
+        return (Long) em.createQuery(query).setParameter("id", key)
+                .getSingleResult();
+    }
+
     @Transactional
     public void create(E e) {
         em.persist(e);
+        em.flush();
     }
 
     @Transactional
     public void edit(E e) {
         em.merge(e);
+        em.flush();
     }
 
     protected int bulkUpdate(List<K> keys) {

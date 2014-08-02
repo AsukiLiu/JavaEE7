@@ -1,7 +1,11 @@
 package org.asuki.model.entity;
 
+import static javax.persistence.InheritanceType.JOINED;
+
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
+import javax.persistence.Inheritance;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -21,6 +25,8 @@ import lombok.experimental.Wither;
 @ToString(exclude = { "post" })
 @EqualsAndHashCode(callSuper = false)
 @Wither
+@Inheritance(strategy = JOINED)
+@DiscriminatorColumn(name="comment_type")
 public class Comment extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
