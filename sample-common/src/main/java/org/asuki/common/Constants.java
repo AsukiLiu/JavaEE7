@@ -13,4 +13,8 @@ public interface Constants {
         String DEFAULT_CHARSET = Charsets.UTF_8.toString();
     }
 
+    interface Sqls {
+        String COUNT_COMMENTS_BY_ID = "COUNT_COMMENTS_BY_ID";
+    }
+
 }

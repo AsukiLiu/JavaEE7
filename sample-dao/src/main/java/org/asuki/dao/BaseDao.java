@@ -49,6 +49,11 @@ public abstract class BaseDao<E, K> {
                 .getSingleResult();
     }
 
+    public long countByNamedQuery(K key, String queryKey) {
+        return (Long) em.createNamedQuery(queryKey).setParameter("id", key)
+                .getSingleResult();
+    }
+
     @Transactional
     public void create(E e) {
         em.persist(e);

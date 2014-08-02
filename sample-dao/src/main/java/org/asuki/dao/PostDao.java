@@ -1,5 +1,7 @@
 package org.asuki.dao;
 
+import static org.asuki.common.Constants.Sqls.COUNT_COMMENTS_BY_ID;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -23,10 +25,13 @@ public class PostDao extends BaseDao<Post, Long> {
     }
 
     public long countCommentsById(Long id) {
-        // Same: JOIN p.comments c
         return countByQuery(
                 id,
                 "SELECT COUNT(c) FROM Post p JOIN TREAT(p.comments AS Comment) c WHERE p.id=:id");
+    }
+
+    public long countCommentsById_2(Long id) {
+        return countByNamedQuery(id, COUNT_COMMENTS_BY_ID);
     }
 
     @Transactional

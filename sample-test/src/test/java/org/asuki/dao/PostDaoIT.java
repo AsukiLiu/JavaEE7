@@ -135,6 +135,7 @@ public class PostDaoIT {
         postDao.edit(post);
 
         assertThat(postDao.countCommentsById(id), is(2L));
+        assertThat(postDao.countCommentsById_2(id), is(2L));
     }
 
 }
