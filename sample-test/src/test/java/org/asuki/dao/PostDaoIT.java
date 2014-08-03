@@ -12,10 +12,12 @@ import java.io.IOException;
 import org.asuki.common.Resources;
 import org.asuki.dao.PostDao;
 import org.asuki.model.converter.UuidToBytesConverter;
+import org.asuki.model.converter.ModeConverter;
 import org.asuki.model.entity.Comment;
 import org.asuki.model.entity.Post;
 import org.asuki.model.entity.CommentNegative;
 import org.asuki.model.entity.CommentPositive;
+import org.asuki.model.enums.Mode;
 import org.asuki.model.listener.BaseEntityListener;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -44,11 +46,18 @@ public class PostDaoIT {
 
     @Deployment
     public static WebArchive createDeployment() throws IOException {
+        // @formatter:off
         final WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "test.war")
-                .addPackages(true, "org.asuki.model.entity", "org.asuki.dao")
-                .addClasses(BaseEntityListener.class,
-                        UuidToBytesConverter.class, BaseEntityListener.class,
+                .addPackages(true, 
+                        "org.asuki.model.entity", 
+                        "org.asuki.dao")
+                .addClasses(
+                        BaseEntityListener.class, 
+                        Mode.class,
+                        UuidToBytesConverter.class, 
+                        ModeConverter.class, 
+                        BaseEntityListener.class,
                         Resources.class)
                 .addAsWebInfResource("META-INF/jboss-deployment-structure.xml",
                         "jboss-deployment-structure.xml")
@@ -56,6 +65,7 @@ public class PostDaoIT {
                         "classes/META-INF/persistence.xml")
                 .addAsWebInfResource(EmptyAsset.INSTANCE,
                         ArchivePaths.create("beans.xml"));
+        // @formatter:on
 
         LOG.info(war.toString(Formatters.VERBOSE));
 
@@ -136,6 +146,20 @@ public class PostDaoIT {
 
         assertThat(postDao.countCommentsById(id), is(2L));
         assertThat(postDao.countCommentsById_2(id), is(2L));
+    }
+
+    @Test
+    @InSequence(4)
+    public void testConverter() {
+        final Long id = 7L;
+
+        Post post = postDao.findById(id);
+        post.setMode(Mode.READ_WRITE);
+        postDao.edit(post);
+
+        post = postDao.findById(id);
+
+        assertThat(post.getMode(), is(Mode.READ_WRITE));
     }
 
 }

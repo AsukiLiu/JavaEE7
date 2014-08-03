@@ -14,9 +14,10 @@ import javax.persistence.NamedEntityGraph;
 import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Converts;
 
 import org.asuki.model.converter.UuidToBytesConverter;
+import org.asuki.model.converter.ModeConverter;
+import org.asuki.model.enums.Mode;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -28,7 +29,6 @@ import lombok.experimental.Wither;
 
 @Entity
 @Table(name = "post")
-@Converts(value = { @Convert(attributeName = "uuid", converter = UuidToBytesConverter.class) })
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
@@ -53,7 +53,7 @@ public class Post extends BaseEntity {
 
     @Getter
     @Setter
-    // @Convert(converter = UuidToBytesConverter.class)
+    @Convert(converter = UuidToBytesConverter.class)
     @Column
     private UUID uuid;
 
@@ -61,6 +61,12 @@ public class Post extends BaseEntity {
     @Setter
     @Column
     private boolean approved;
+
+    @Getter
+    @Setter
+    @Convert(converter = ModeConverter.class)
+    @Column
+    private Mode mode;
 
     @Getter
     @Setter
