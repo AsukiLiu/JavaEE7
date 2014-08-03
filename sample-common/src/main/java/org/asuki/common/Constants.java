@@ -17,4 +17,10 @@ public interface Constants {
         String COUNT_COMMENTS_BY_ID = "COUNT_COMMENTS_BY_ID";
     }
 
+    interface Batchs {
+        String JOB_NAME = "myJob";
+        int EXECUTION_DELAY = 3;
+        int EXECUTION_TIMES = 3;
+    }
+
 }
