@@ -15,11 +15,11 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
-public class CustomRequestWrapper extends HttpServletRequestWrapper {
+public class HeaderRequestWrapper extends HttpServletRequestWrapper {
 
     private Map<String, String> addHeaders;
 
-    public CustomRequestWrapper(HttpServletRequest request,
+    public HeaderRequestWrapper(HttpServletRequest request,
             Map<String, String> addHeaders) {
 
         super(request);
@@ -30,8 +30,8 @@ public class CustomRequestWrapper extends HttpServletRequestWrapper {
 
     @Override
     public String getHeader(String name) {
-        return firstNonNull(super.getHeader(name),
-                firstNonNull(addHeaders.get(name), ""));
+        return super.getHeader(name) != null ? super.getHeader(name)
+                : addHeaders.get(name);
     }
 
     @Override

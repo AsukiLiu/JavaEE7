@@ -15,11 +15,11 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.asuki.web.servlet.wrapper.CustomRequestWrapper;
+import org.asuki.web.servlet.wrapper.HeaderRequestWrapper;
 import org.asuki.web.servlet.wrapper.CustomResponseWrapper;
 
 @WebFilter("/*")
-public class WrapperFilter implements Filter {
+public class HeaderFilter implements Filter {
 
     @Override
     public void init(FilterConfig config) throws ServletException {
@@ -37,15 +37,20 @@ public class WrapperFilter implements Filter {
         addHeaders.put("X-USER-ID", "1001");
         addHeaders.put("X-USER-NAME", "Andy");
 
-        CustomRequestWrapper wrappedReq = new CustomRequestWrapper(
+        HeaderRequestWrapper wrappedRequest = new HeaderRequestWrapper(
                 (HttpServletRequest) request, addHeaders);
-        CustomResponseWrapper wrappedResp = new CustomResponseWrapper(
+        CustomResponseWrapper wrappedResponse = new CustomResponseWrapper(
                 (HttpServletResponse) response);
 
-        chain.doFilter(wrappedReq, wrappedResp);
+        chain.doFilter(wrappedRequest, wrappedResponse);
+
+        if (response.getContentType() == null
+                || !response.getContentType().contains("text/html")) {
+            return;
+        }
 
         try (PrintWriter out = response.getWriter()) {
-            String outHtml = wrappedResp.toString();
+            String outHtml = wrappedResponse.toString();
             outHtml += "<!-- Wrapper Test -->";
 
             response.setContentLength(outHtml.length());
