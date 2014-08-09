@@ -1,4 +1,4 @@
-package org.asuki.web.filter;
+package org.asuki.web.servlet.filter;
 
 import static java.util.Arrays.stream;
 
