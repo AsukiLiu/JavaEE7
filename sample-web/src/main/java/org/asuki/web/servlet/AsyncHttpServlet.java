@@ -1,5 +1,6 @@
 package org.asuki.web.servlet;
 
+import static org.asuki.common.Constants.Webs.DEFAULT_CONTENT_TYPE;
 import static org.asuki.common.Constants.Webs.DEFAULT_CHARSET;
 
 import java.io.IOException;
@@ -18,10 +19,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import lombok.SneakyThrows;
 
+import org.asuki.web.service.AsyncService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@WebServlet(urlPatterns = { "/async" }, loadOnStartup = 1, asyncSupported = true, initParams = {
+@WebServlet(urlPatterns = "/async", loadOnStartup = 1, asyncSupported = true, initParams = {
         @WebInitParam(name = "name", value = "Andy"),
         @WebInitParam(name = "age", value = "20") })
 public class AsyncHttpServlet extends HttpServlet {
@@ -30,6 +32,9 @@ public class AsyncHttpServlet extends HttpServlet {
 
     @Inject
     private Logger log;
+
+    @Inject
+    private AsyncService asyncService;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -41,21 +46,23 @@ public class AsyncHttpServlet extends HttpServlet {
             throws ServletException, IOException {
 
         req.setCharacterEncoding(DEFAULT_CHARSET);
-        resp.setContentType("text/html;charset=utf-8");
+        resp.setContentType(DEFAULT_CONTENT_TYPE);
 
         AsyncContext asyncContext = req.startAsync();
         asyncContext.setTimeout(30 * 1000);
         asyncContext.start(new JobThread(asyncContext));
 
-        log.info("Do another thing ...");
+        asyncService.doSomething(asyncContext);
 
-        PrintWriter out = resp.getWriter();
         ServletConfig config = getServletConfig();
+        try (PrintWriter out = resp.getWriter()) {
+            out.println(config.getInitParameter("name"));
+            out.println(config.getInitParameter("age"));
 
-        out.println(config.getInitParameter("name"));
-        out.println(config.getInitParameter("age"));
+            out.flush();
+        }
 
-        out.flush();
+        log.info("Servlet done");
     }
 
 }
@@ -74,10 +81,10 @@ class JobThread implements Runnable {
     @Override
     public void run() {
 
-        log.info("Do one thing ...");
-
         TimeUnit.SECONDS.sleep(3);
 
         asyncContext.dispatch("/index.xhtml");
+
+        log.info("Job done");
     }
 }

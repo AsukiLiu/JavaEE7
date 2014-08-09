@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.asuki.web.servlet.wrapper.ParameterRequestWrapper;
 
-@WebFilter("/*")
+@WebFilter(urlPatterns = "/*", asyncSupported = true)
 public class ParameterFilter implements Filter {
 
     private final String FILTER_NAME = getClass().getSimpleName();

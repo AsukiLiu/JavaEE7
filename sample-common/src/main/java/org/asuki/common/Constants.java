@@ -1,6 +1,7 @@
 package org.asuki.common;
 
 import com.google.common.base.Charsets;
+import com.google.common.net.MediaType;
 
 public interface Constants {
 
@@ -11,6 +12,7 @@ public interface Constants {
 
     interface Webs {
         String DEFAULT_CHARSET = Charsets.UTF_8.toString();
+        String DEFAULT_CONTENT_TYPE = MediaType.HTML_UTF_8.toString();
     }
 
     interface Sqls {

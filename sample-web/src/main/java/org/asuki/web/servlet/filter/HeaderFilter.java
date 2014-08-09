@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.asuki.web.servlet.wrapper.HeaderRequestWrapper;
 import org.asuki.web.servlet.wrapper.CustomResponseWrapper;
 
-@WebFilter("/*")
+@WebFilter(urlPatterns = "/*", asyncSupported = true)
 public class HeaderFilter implements Filter {
 
     @Override
