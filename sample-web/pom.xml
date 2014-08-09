@@ -30,6 +30,11 @@
         </dependency>
         <dependency>
             <groupId>org.asuki</groupId>
+            <artifactId>sample-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.asuki</groupId>
             <artifactId>sample-webservice</artifactId>
             <version>${project.version}</version>
         </dependency>

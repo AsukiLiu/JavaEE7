@@ -11,6 +11,7 @@ import java.io.IOException;
 
 import org.asuki.common.Resources;
 import org.asuki.dao.PostDao;
+import org.asuki.model.cdi.VetoExtension;
 import org.asuki.model.converter.UuidToBytesConverter;
 import org.asuki.model.converter.ModeConverter;
 import org.asuki.model.entity.Comment;
@@ -34,6 +35,8 @@ import org.junit.runner.RunWith;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.spi.Extension;
 import javax.inject.Inject;
 import javax.persistence.PersistenceUnitUtil;
 
@@ -58,7 +61,9 @@ public class PostDaoIT {
                         UuidToBytesConverter.class, 
                         ModeConverter.class, 
                         BaseEntityListener.class,
+                        VetoExtension.class,
                         Resources.class)
+                .addAsServiceProvider(Extension.class, VetoExtension.class)
                 .addAsWebInfResource("META-INF/jboss-deployment-structure.xml",
                         "jboss-deployment-structure.xml")
                 .addAsWebInfResource("META-INF/persistence.xml",
@@ -74,6 +79,9 @@ public class PostDaoIT {
 
     @Inject
     private PostDao postDao;
+
+    @Inject
+    private Instance<Post> post;
 
     @Before
     public void setUp() {
@@ -160,6 +168,13 @@ public class PostDaoIT {
         post = postDao.findById(id);
 
         assertThat(post.getMode(), is(Mode.READ_WRITE));
+    }
+
+    @Test
+    @InSequence(5)
+    public void testVetoExtension() {
+        assertThat(post.isUnsatisfied(), is(true));
+        assertThat(post.isAmbiguous(), is(false));
     }
 
 }
