@@ -1,15 +1,13 @@
 package org.asuki.common.javase;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.System.out;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -20,13 +18,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import lombok.SneakyThrows;
 
 import org.testng.annotations.Test;
-
-import com.google.common.collect.ImmutableList;
 
 public class Javase8Test {
 
@@ -219,80 +214,6 @@ public class Javase8Test {
         Converter<String, String> startsWith = instance::startsWith;
 
         assertThat(startsWith.convert("Java"), is("J"));
-    }
-
-    @Test
-    public void testStreamCaseA() {
-
-        final List<String> list = ImmutableList.of("sa", "bb", "sc");
-
-        List<String> oldWay = newArrayList();
-        for (String str : list) {
-            if (str.startsWith("s")) {
-                oldWay.add(str.toUpperCase());
-            }
-        }
-
-        // s -> s.toUpperCase()
-        List<String> newWay = list.stream()
-                .filter(s -> s.startsWith("s"))
-                .map(String::toUpperCase)
-                .collect(Collectors.toList());
-
-        assertThat(oldWay, is(newWay));
-
-        list.stream()
-            .map(String::toUpperCase)
-            .sorted((a, b) -> b.compareTo(a))
-            .forEach(out::println);
-
-        Predicate<String> predicate = (s) -> s.startsWith("b");
-
-        assertThat(list.stream().anyMatch(predicate), is(true));
-
-        assertThat(list.stream().allMatch(predicate), is(false));
-
-        assertThat(list.stream().noneMatch(predicate), is(false));
-
-        assertThat(list.stream().filter(predicate).count(), is(1L));
-
-        Optional<String> reduced = list.stream()
-                .sorted()
-                .reduce((s1, s2) -> s1 + "#" + s2);
-
-        reduced.ifPresent(out::println);
-
-        assertThat(reduced.get(), is("bb#sa#sc"));
-    }
-
-    @Test
-    public void testStreamCaseB() {
-
-        List<Person> persons = Arrays.asList(
-                new Person("Tom", 20), 
-                new Person("John", 40), 
-                new Person("John", 30));
-
-        String nameString = persons.stream()
-                .map((p) -> p.getName())
-                .collect(Collectors.joining(", "));
-
-        assertThat(nameString, is("Tom, John, John"));
-
-        List<String> names = persons.stream()
-                .map((p) -> p.getName())
-                .distinct()
-                .collect(Collectors.toList());
-
-        assertThat(names.size(), is(2));
-
-        IntSummaryStatistics stats = persons.stream()
-                .mapToInt((p) -> p.getAge())
-                .summaryStatistics();
-
-        assertThat(
-                stats.toString(),
-                is("IntSummaryStatistics{count=3, sum=90, min=20, average=30.000000, max=40}"));
     }
 
 }
