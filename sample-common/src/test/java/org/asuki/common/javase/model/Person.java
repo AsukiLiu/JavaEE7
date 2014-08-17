@@ -1,6 +1,9 @@
-package org.asuki.common.javase;
+package org.asuki.common.javase.model;
+
+import static org.asuki.common.javase.annotation.Sample.Level.HIGH;
 
 import org.asuki.common.javase.annotation.Hint;
+import org.asuki.common.javase.annotation.Sample;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,12 +21,19 @@ import lombok.ToString;
 @Hint("hint2")
 public class Person {
 
+    @Sample(item = { "first name", "last name" })
     private String name;
 
+    @Sample("30")
     private int age;
 
     public Person(String name) {
         this.name = name;
+    }
+
+    @Sample(item = { "item1", "item2" }, level = HIGH)
+    public void doSomething() {
+        // do something
     }
 
 }

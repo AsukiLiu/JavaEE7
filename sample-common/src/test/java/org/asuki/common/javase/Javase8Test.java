@@ -21,6 +21,7 @@ import java.util.function.Supplier;
 
 import lombok.SneakyThrows;
 
+import org.asuki.common.javase.model.Person;
 import org.testng.annotations.Test;
 
 public class Javase8Test {

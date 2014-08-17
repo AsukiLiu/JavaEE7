@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 
 import lombok.SneakyThrows;
 
+import org.asuki.common.javase.model.Person;
 import org.testng.annotations.Test;
 
 import com.google.common.base.Stopwatch;
