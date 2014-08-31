@@ -17,7 +17,7 @@ import org.testng.annotations.Test;
 
 public class SemaphoreTest {
 
-    private static final int MAX_THREAD_NUM = 3;
+    private static final int THREAD_NUM = 3;
 
     @SneakyThrows
     @Test
@@ -25,15 +25,15 @@ public class SemaphoreTest {
         final ExecutorService service = Executors.newCachedThreadPool();
 
         // Limit the number of threads
-        final Semaphore sp = new Semaphore(MAX_THREAD_NUM);
+        final Semaphore sp = new Semaphore(THREAD_NUM);
 
-        range(0, 5).forEach(m -> service.execute(new Task(sp)));
+        range(0, 5).forEach(m -> service.execute(new Worker(sp)));
 
         TimeUnit.SECONDS.sleep(10);
     }
 
     @AllArgsConstructor
-    private static class Task implements Runnable {
+    private static class Worker implements Runnable {
 
         private Semaphore sp;
 
@@ -44,13 +44,13 @@ public class SemaphoreTest {
 
             out.println(format("%s entered! Current threads:%d",
                     currentThread().getName(),
-                    (MAX_THREAD_NUM - sp.availablePermits())));
+                    (THREAD_NUM - sp.availablePermits())));
 
             TimeUnit.SECONDS.sleep((int) (Math.random() * 10));
 
             sp.release();
             out.println(format("%s left! Current threads:%d", currentThread()
-                    .getName(), (MAX_THREAD_NUM - sp.availablePermits())));
+                    .getName(), (THREAD_NUM - sp.availablePermits())));
         }
 
     }
