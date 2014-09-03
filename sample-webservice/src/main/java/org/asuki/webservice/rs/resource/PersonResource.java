@@ -19,12 +19,15 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
+import org.asuki.webservice.rs.annotation.PATCH;
 import org.asuki.webservice.rs.entity.Person;
 
+//http://localhost:8080/sample-web/rs/persons
 @Path("persons")
 @Produces(APPLICATION_JSON)
-public class PersonResource {
+public class PersonResource extends BaseResource {
 
     private static final ConcurrentMap<String, Person> persons = new ConcurrentHashMap<>();
 
@@ -66,5 +69,18 @@ public class PersonResource {
 
         persons.put(id, person);
         return Response.status(CREATED).entity(person).build();
+    }
+
+    @PATCH
+    @Path("dummy")
+    @Produces(APPLICATION_JSON)
+    public Response doSomething() {
+
+        Person person = new Person();
+        person.setId(101);
+        person.setName("Andy");
+
+        StreamingOutput output = getJsonStream(person);
+        return Response.ok().entity(output).build();
     }
 }
