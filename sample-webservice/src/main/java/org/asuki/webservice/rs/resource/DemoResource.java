@@ -1,6 +1,7 @@
 package org.asuki.webservice.rs.resource;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.util.Arrays.asList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -9,6 +10,7 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
 import java.net.URI;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +33,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.asuki.webservice.rs.entity.Bean;
+import org.asuki.webservice.rs.entity.JsonResponse;
 import org.asuki.webservice.rs.entity.Names;
 import org.asuki.webservice.rs.entity.RoastType;
 import org.slf4j.Logger;
@@ -193,6 +196,19 @@ public class DemoResource extends BaseResource {
         map.put("title", "Web Develop Art");
         map.put("url", "https://sites.google.com/site/webdevelopart/");
         return map;
+    }
+
+    @GET
+    @Path("error")
+    public Response getError(@QueryParam("error") String error) {
+
+        if (!isNullOrEmpty(error)) {
+            throw new RuntimeException("Testing error");
+        }
+
+        JsonResponse json = new JsonResponse("SUCCESS");
+        json.setData(new Date());
+        return Response.ok().entity(json).build();
     }
 
 }
