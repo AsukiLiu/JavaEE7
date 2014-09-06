@@ -1,5 +1,7 @@
 package org.asuki.webservice.rs.entity;
 
+import java.util.Date;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -25,5 +27,7 @@ public class Person {
     @NotNull
     @Size(min = 2, max = 30)
     private String name;
+
+    private Date lastModified;
 
 }
