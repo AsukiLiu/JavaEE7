@@ -6,6 +6,7 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.IntSummaryStatistics;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
 import lombok.SneakyThrows;
 
 import org.asuki.common.javase.model.Person;
+import org.asuki.common.javase.model.Student;
 import org.testng.annotations.Test;
 
 import com.google.common.base.Stopwatch;
@@ -158,7 +160,7 @@ public class StreamTest {
     }
 
     @Test
-    public void testParallel() {
+    public void testParallelCaseA() {
         Integer[] array = { 9, 5, 10 };
         Arrays.parallelSort(array);
         assertThat(asList(array).toString(), is("[5, 9, 10]"));
@@ -194,6 +196,34 @@ public class StreamTest {
         stopwatch.stop();
         // <10s
         out.printf(" Time: %s%n", stopwatch);
+    }
+
+    @Test
+    public void testParallelCaseB() {
+        List<Person> persons = asList(new Person("Joe"), new Person("Jim"),
+                new Person("John"));
+        persons.forEach(p -> p.setAge(20));
+
+        // @formatter:off
+        
+        // .map(person -> new Student(person))
+        List<Student> students = persons.stream()
+                .filter(p -> p.getAge() > 18)
+                .map(Student::new)
+                .collect(Collectors.toList());
+
+        students = persons.stream()
+                .parallel()
+                .filter(p -> p.getAge() > 18)
+                .sequential()
+                .map(Student::new)
+                .collect(Collectors.toCollection(ArrayList::new));
+        
+        // @formatter:on
+
+        assertThat(
+                students.toString(),
+                is("[Person(name=Joe, age=20), Person(name=Jim, age=20), Person(name=John, age=20)]"));
     }
 
     @SneakyThrows
