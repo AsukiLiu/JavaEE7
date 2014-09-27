@@ -141,6 +141,16 @@ public class Javase8Test {
 
         assertThat(toInteger.apply("123"), is(123));
         assertThat(toString.apply("123"), is("123"));
+
+        Function<Integer, Integer> f1 = x -> 1 + x;
+        Function<Integer, Integer> f2 = x -> 2 * x;
+
+        // f2 -> f1
+        assertThat(f1.compose(f2).apply(0), is(1));
+        // f1 -> f2
+        assertThat(f1.andThen(f2).apply(0), is(2));
+        // f1 -> f1 -> f2
+        assertThat(f1.andThen(f2).compose(f1).apply(0), is(4));
     }
 
     @Test
