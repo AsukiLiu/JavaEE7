@@ -7,8 +7,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
-import org.asuki.common.javase.annotation.Sample;
-
 public final class AnnotationResolver {
 
     private AnnotationResolver() {

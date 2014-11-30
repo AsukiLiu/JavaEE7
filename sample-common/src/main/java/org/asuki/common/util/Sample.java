@@ -1,4 +1,4 @@
-package org.asuki.common.javase.annotation;
+package org.asuki.common.util;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.FIELD;

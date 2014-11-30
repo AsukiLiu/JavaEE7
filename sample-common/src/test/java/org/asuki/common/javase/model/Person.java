@@ -1,9 +1,9 @@
 package org.asuki.common.javase.model;
 
-import static org.asuki.common.javase.annotation.Sample.Level.HIGH;
+import static org.asuki.common.util.Sample.Level.HIGH;
 
 import org.asuki.common.javase.annotation.Hint;
-import org.asuki.common.javase.annotation.Sample;
+import org.asuki.common.util.Sample;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
