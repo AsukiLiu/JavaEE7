@@ -1,7 +1,5 @@
 package org.asuki.webservice.rs.data;
 
-import static org.asuki.webservice.rs.entity.User.builder;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +11,7 @@ public class DummyUserDatabase {
 
     static {
         // @formatter:off
-        User user = builder()
+        User user = User.builder()
                 .id(1)
                 .firstName("Andy")
                 .lastName("L")
