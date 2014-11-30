@@ -52,7 +52,7 @@ public class PerformanceTest {
     }
 
     @SneakyThrows
-    @Test(dataProvider = "readerWriterData")
+    @Test(enabled = false, dataProvider = "readerWriterData")
     public void test(int readerNum, int writerNum) {
         NUM_READERS = readerNum;
         NUM_WRITERS = writerNum;

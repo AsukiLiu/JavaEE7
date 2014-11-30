@@ -12,7 +12,7 @@ public class DirtyTest extends AbstractLockTest {
         spaceship = new DirtySpaceship();
     }
 
-    @Test(dependsOnMethods = "testThreads")
+    @Test(enabled = false, dependsOnMethods = "testThreads")
     public void testResult() {
         assertThat(spaceship.toString(), not(containsString(expected)));
     }
