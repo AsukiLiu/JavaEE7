@@ -44,7 +44,11 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.MutableClassToInstanceMap;
 import com.google.common.collect.Range;
+import com.google.common.collect.RangeMap;
+import com.google.common.collect.RangeSet;
 import com.google.common.collect.Table;
+import com.google.common.collect.TreeRangeMap;
+import com.google.common.collect.TreeRangeSet;
 
 public class CollectionTest {
 
@@ -207,6 +211,34 @@ public class CollectionTest {
 
         Customer actual = customerInstanceMap.getInstance(Customer.class);
         assertEquals(actual.toString(), "Customer{name=Google, id=10}");
+    }
+
+    @Test
+    public void testRangeSet() {
+        RangeSet<Integer> rangeSet = TreeRangeSet.create();
+        rangeSet.add(closed(1, 10));
+        out.println(rangeSet);
+        rangeSet.add(closedOpen(11, 15));
+        out.println(rangeSet);
+        rangeSet.add(open(15, 20));
+        out.println(rangeSet);
+
+        rangeSet.remove(open(5, 10));
+        assertEquals(rangeSet.toString(), "[[1‥5], [10‥10], [11‥15), (15‥20)]");
+    }
+
+    @Test
+    public void testRangeMap() {
+        RangeMap<Integer, String> rangeMap = TreeRangeMap.create();
+        rangeMap.put(closed(1, 10), "foo");
+        out.println(rangeMap);
+        rangeMap.put(open(3, 6), "bar");
+        out.println(rangeMap);
+        rangeMap.put(open(10, 20), "foo");
+        out.println(rangeMap);
+
+        rangeMap.remove(closed(5, 11));
+        assertEquals(rangeMap.toString(), "[[1‥3]=foo, (3‥5)=bar, (11‥20)=foo]");
     }
 
     @Test(dataProvider = "rangeData")

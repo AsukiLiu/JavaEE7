@@ -179,7 +179,7 @@ public class BaseTest {
                 .useForNull("none");
 
         assertEquals(joiner.join(dictionary),
-                "key3:none, key2:value2, key1:value1");
+                "key1:value1, key2:value2, key3:none");
 
         String str = "xxx=yyy#aaa=bbb";
         MapSplitter mapSplitter = Splitter.on("#").withKeyValueSeparator("=");
