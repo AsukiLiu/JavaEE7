@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +32,7 @@ import org.testng.annotations.Test;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicates;
+import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.BoundType;
@@ -42,12 +44,14 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.MutableClassToInstanceMap;
+import com.google.common.collect.PeekingIterator;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.RangeSet;
@@ -270,6 +274,40 @@ public class CollectionTest {
 
         Customer actual = customerInstanceMap.getInstance(Customer.class);
         assertEquals(actual.toString(), "Customer{name=Google, id=10}");
+    }
+
+    @Test
+    public void testPeekingIterator() {
+        List<String> source = newArrayList("a", "b", "b", null, "c", null, "c");
+
+        List<String> result = newArrayList();
+        PeekingIterator<String> it = Iterators
+                .peekingIterator(skipNulls(source.iterator()));
+
+        while (it.hasNext()) {
+            String current = it.next();
+            while (it.hasNext() && it.peek().equals(current)) {
+                it.next();
+            }
+            result.add(current);
+        }
+
+        assertEquals(result.toString(), "[a, b, c]");
+    }
+
+    private static Iterator<String> skipNulls(Iterator<String> it) {
+        return new AbstractIterator<String>() {
+            @Override
+            protected String computeNext() {
+                while (it.hasNext()) {
+                    String s = it.next();
+                    if (s != null) {
+                        return s;
+                    }
+                }
+                return endOfData();
+            }
+        };
     }
 
     @Test
