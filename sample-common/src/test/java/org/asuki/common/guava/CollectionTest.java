@@ -33,6 +33,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.BiMap;
+import com.google.common.collect.BoundType;
 import com.google.common.collect.ClassToInstanceMap;
 //import com.google.common.collect.Constraints;
 import com.google.common.collect.HashBasedTable;
@@ -53,6 +54,7 @@ import com.google.common.collect.RangeSet;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeRangeMap;
 import com.google.common.collect.TreeRangeSet;
+import com.google.common.primitives.Ints;
 
 public class CollectionTest {
 
@@ -299,11 +301,43 @@ public class CollectionTest {
     }
 
     @Test(dataProvider = "rangeData")
-    public void testRanges(Range<Integer> range, boolean isContain,
+    public void testRange1(Range<Integer> range, boolean isContain,
             boolean isNotContain) {
 
         assertEquals(range.contains(0), isContain);
         assertEquals(range.contains(10), isNotContain);
+    }
+
+    @Test
+    public void testRange2() {
+        assertEquals(range(1, BoundType.CLOSED, 4, BoundType.OPEN).toString(),
+                "[1‥4)");
+
+        assertEquals(closed(1, 4).containsAll(Ints.asList(1, 2, 3)), true);
+
+        assertEquals(closedOpen(4, 4).hasLowerBound(), true);
+        assertEquals(closedOpen(4, 4).hasUpperBound(), true);
+        assertEquals(closedOpen(4, 4).isEmpty(), true);
+        assertEquals(closed(4, 4).isEmpty(), false);
+
+        assertEquals(open(3, 10).lowerEndpoint(), Integer.valueOf(3));
+        assertEquals(closed(3, 10).upperEndpoint(), Integer.valueOf(10));
+        assertEquals(closed(3, 10).lowerBoundType(), BoundType.CLOSED);
+        assertEquals(open(3, 10).upperBoundType(), BoundType.OPEN);
+
+        assertEquals(open(1, 4).encloses(closedOpen(2, 4)), true);
+        assertEquals(open(1, 4).encloses(closedOpen(2, 5)), false);
+
+        assertEquals(closed(3, 5).isConnected(open(5, 10)), true);
+        assertEquals(closed(0, 9).isConnected(closed(3, 4)), true);
+        assertEquals(open(3, 5).isConnected(open(5, 10)), false);
+
+        assertEquals(closed(3, 5).intersection(open(5, 10)).toString(), "(5‥5]");
+        assertEquals(closed(0, 5).intersection(closed(3, 9)).toString(),
+                "[3‥5]");
+
+        assertEquals(closed(3, 5).span(open(5, 10)).toString(), "[3‥10)");
+        assertEquals(closed(1, 5).span(closed(7, 10)).toString(), "[1‥10]");
     }
 
     @DataProvider(name = "rangeData")
