@@ -10,14 +10,16 @@ import static com.google.common.collect.Sets.union;
 import static java.lang.System.out;
 import static org.testng.Assert.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.IntStream;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,7 +38,9 @@ import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultiset;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -56,6 +60,59 @@ public class CollectionTest {
     private Customer customer2 = new Customer(2, "Name2");
     private Customer customer3 = new Customer(3, "Name3");
     private Customer customer4 = new Customer(null, "Unknown");
+
+    @Test
+    public void testImmutable1() {
+        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c"));
+
+        List<String> unmodifiableList = Collections.unmodifiableList(list);
+        ImmutableList<String> immutableList = ImmutableList.copyOf(list);
+
+        list.add("d");
+
+        assertEquals(unmodifiableList.toString(), "[a, b, c, d]");
+        assertEquals(immutableList.toString(), "[a, b, c]");
+
+        ImmutableList<String> immutableOflist = ImmutableList.of("a", "b", "c");
+        assertEquals(immutableOflist.toString(), "[a, b, c]");
+
+        ImmutableSortedSet<String> immutableSortList = ImmutableSortedSet.of(
+                "c", "b", "d", "a", "a", "b");
+        assertEquals(immutableSortList.toString(), "[a, b, c, d]");
+
+        // @formatter:off
+        ImmutableSet<Customer> immutableBuilderSet = ImmutableSet.<Customer> builder()
+                    .add(new Customer(11, "Google"))
+                    .add(new Customer(12, "Amazon"))
+                    .build();
+        // @formatter:on
+
+        assertEquals(immutableBuilderSet.toString(),
+                "[Customer{name=Google, id=11}, Customer{name=Amazon, id=12}]");
+    }
+
+    @Test
+    public void testImmutable2() {
+        ImmutableSet<String> immutableSet = ImmutableSet.of("c", "d", "a", "b");
+        ImmutableList<String> immutableList = ImmutableList
+                .copyOf(immutableSet);
+        ImmutableSortedSet<String> immutableSortSet = ImmutableSortedSet
+                .copyOf(immutableList);
+        assertEquals(immutableSortSet.toString(), "[a, b, c, d]");
+        assertEquals(immutableSortSet.asList().toString(), "[a, b, c, d]");
+
+        List<Integer> list = new ArrayList<>();
+        IntStream.range(0, 10).forEach(m -> list.add(m));
+
+        ImmutableList<Integer> immutableCopylist = ImmutableList.copyOf(list
+                .subList(2, 8));
+        assertEquals(immutableCopylist.size(), 6);
+        assertEquals(immutableCopylist.toString(), "[2, 3, 4, 5, 6, 7]");
+
+        ImmutableSet<Integer> immutableCopySet = ImmutableSet
+                .copyOf(immutableCopylist.subList(2, 3));
+        assertEquals(immutableCopySet.toString(), "[4]");
+    }
 
     @Test
     public void testLists() {

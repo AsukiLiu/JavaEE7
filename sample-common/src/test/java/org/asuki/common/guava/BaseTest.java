@@ -88,6 +88,23 @@ public class BaseTest {
         }
 
         assertEquals(possible.or(10), Integer.valueOf(3));
+
+        Long result = 0L;
+
+        Optional<Long> nullValue = Optional.absent();
+        // Optional<Long> nullValue = Optional.fromNullable(null);
+        assertEquals(nullValue.orNull(), null);
+
+        result = nullValue.isPresent() ? nullValue.get() : nullValue.or(-1L);
+        assertEquals((long) result, -1L);
+
+        Optional<Long> notNullValue = Optional.fromNullable(5L);
+        assertEquals((long) notNullValue.orNull(), 5L);
+
+        result = notNullValue.isPresent() ? notNullValue.get() : notNullValue
+                .or(-1L);
+        assertEquals((long) result, 5L);
+        assertEquals(notNullValue.asSet().size(), 1);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
