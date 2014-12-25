@@ -1,4 +1,4 @@
-package org.asuki.bv;
+package org.asuki.bv.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -8,15 +8,15 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-@Constraint(validatedBy = { ForbiddenValidator.class })
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.FIELD })
-public @interface ForbiddenValues {
-    String[] value() default { "password" };
+import org.asuki.bv.validator.NameValidator;
 
+@Constraint(validatedBy = { NameValidator.class })
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.METHOD })
+public @interface NameDifferent {
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
 
-    String message() default "{org.asuki.bv.ForbiddenValues.message}";
+    String message() default "{org.asuki.bv.annotation.NameDifferent.message}";
 }
