@@ -13,6 +13,7 @@
 
     <properties>
         <org.jboss.resteasy>3.0.8.Final</org.jboss.resteasy>
+        <apache.camel.version>2.13.3</apache.camel.version>
     </properties>
 
     <dependencies>
@@ -104,6 +105,17 @@
             <groupId>com.netflix.rxjava</groupId>
             <artifactId>rxjava-core</artifactId>
             <version>0.19.0</version>
+        </dependency>
+        <!-- Camel -->
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-core</artifactId>
+            <version>${apache.camel.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-cdi</artifactId>
+            <version>${apache.camel.version}</version>
         </dependency>
     </dependencies>
 
