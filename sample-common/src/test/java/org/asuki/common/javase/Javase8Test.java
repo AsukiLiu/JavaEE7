@@ -1,9 +1,11 @@
 package org.asuki.common.javase;
 
 import static java.lang.System.out;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,6 +24,7 @@ import java.util.function.Supplier;
 import lombok.SneakyThrows;
 
 import org.asuki.common.javase.model.Person;
+import org.asuki.common.javase.model.Student;
 import org.testng.annotations.Test;
 
 public class Javase8Test {
@@ -225,6 +228,14 @@ public class Javase8Test {
         Converter<String, String> startsWith = instance::startsWith;
 
         assertThat(startsWith.convert("Java"), is("J"));
+
+        List<Person> persons = new ArrayList<>();
+        persons.add(new Person("Tom", 20));
+        persons.add(new Person("Jack", 30));
+        ListConverterImpl converter = new ListConverterImpl();
+
+        assertThat(converter.convert(persons).toString(),
+                is("[Student{name=Tom, age=20}, Student{name=Jack, age=30}]"));
     }
 
 }
@@ -237,5 +248,18 @@ interface Converter<F, T> {
 class MyClass {
     public String startsWith(String s) {
         return String.valueOf(s.charAt(0));
+    }
+}
+
+interface ListConverter<A, B> extends Function<A, B> {
+    default List<B> convert(List<A> input) {
+        return input.stream().map(this::apply).collect(toList());
+    }
+}
+
+class ListConverterImpl implements ListConverter<Person, Student> {
+    @Override
+    public Student apply(Person person) {
+        return new Student(person);
     }
 }
