@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 
+import org.asuki.json.JsonResource;
 import org.asuki.web.servlet.JsonHttpServlet;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
@@ -30,7 +31,7 @@ public class JsonHttpServletIT {
     public static WebArchive createArchive() {
         final WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "test.war")
-                .addClasses(JsonHttpServlet.class)
+                .addClasses(JsonHttpServlet.class, JsonResource.class)
                 .addAsWebInfResource(EmptyAsset.INSTANCE,
                         ArchivePaths.create("beans.xml"));
 
@@ -59,6 +60,6 @@ public class JsonHttpServletIT {
 
         assertThat(
                 builder.toString(),
-                is("{\"title\":\"Algorithm\",\"isMember\":true,\"authors\":[\"Robby\",\"Zak\"],\"price\":12.34}"));
+                is("{\"title\":\"Algorithm\",\"isMember\":true,\"price\":12.34,\"ids\":[\"101\",\"102\"],\"authors\":[{\"name\":\"Robby\",\"age\":30},{\"name\":\"Zak\",\"age\":20}]}"));
     }
 }

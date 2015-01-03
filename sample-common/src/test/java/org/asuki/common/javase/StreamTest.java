@@ -160,6 +160,23 @@ public class StreamTest {
     }
 
     @Test
+    public void testCaseD() {
+        String[] strings = { "aaa", "bbb", "ccc" };
+
+        List<String> list = Stream.of(strings).collect(ArrayList::new,
+                ArrayList::add, ArrayList::addAll);
+
+        assertThat(list.toString(), is("[aaa, bbb, ccc]"));
+
+        String concat = Stream
+                .of(strings)
+                .collect(StringBuilder::new, StringBuilder::append,
+                        StringBuilder::append).toString();
+
+        assertThat(concat, is("aaabbbccc"));
+    }
+
+    @Test
     public void testParallelCaseA() {
         Integer[] array = { 9, 5, 10 };
         Arrays.parallelSort(array);

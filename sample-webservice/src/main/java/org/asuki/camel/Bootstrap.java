@@ -13,8 +13,8 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.cdi.CdiCamelContext;
 import org.slf4j.Logger;
 
-@Singleton
-@Startup
+//@Singleton
+//@Startup
 public class Bootstrap {
 
     private static final String URI = "timer://timer1?period=1000";
