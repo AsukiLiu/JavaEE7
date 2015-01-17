@@ -36,6 +36,8 @@ public class PerformanceTest {
         new ReadWriteLockSpaceShip(),
         new ReentrantLockSpaceship(),
 
+        new MonitorSpaceship(),
+
         new StampedLockSpaceship(),
         new OptimisticStampedLockSpaceship(),
 
