@@ -6,6 +6,8 @@ import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.*;
 import static com.google.common.base.Predicates.equalTo;
 import static com.google.common.base.Predicates.or;
+import static com.google.common.base.Strings.commonPrefix;
+import static com.google.common.base.Strings.commonSuffix;
 import static com.google.common.base.Strings.emptyToNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.base.Strings.nullToEmpty;
@@ -13,7 +15,6 @@ import static com.google.common.base.Strings.padEnd;
 import static com.google.common.base.Strings.padStart;
 import static com.google.common.base.Strings.repeat;
 import static com.google.common.collect.Iterables.toArray;
-
 import static java.lang.System.out;
 import static org.testng.Assert.*;
 
@@ -29,15 +30,19 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 
 import org.testng.annotations.Test;
 
@@ -56,6 +61,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.base.Splitter;
 import com.google.common.base.Splitter.MapSplitter;
+import com.google.common.base.Stopwatch;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.base.Throwables;
@@ -63,11 +69,14 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import com.google.common.io.Flushables;
 import com.google.common.io.Resources;
 import com.google.common.net.InetAddresses;
+import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 
 public class BaseTest {
@@ -110,8 +119,16 @@ public class BaseTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testPreconditions() {
 
+        List<Integer> list = Lists.newArrayList(1, 2, 3);
+        checkElementIndex(2, list.size());
+        checkPositionIndex(3, list.size());
+        checkPositionIndexes(1, 3, list.size());
+
         checkNotNull(customer2.getId());
+        checkNotNull(customer2.getId(), "%s is null", "ID");
+
         checkState(!customer2.isSick());
+
         checkArgument(customer2.getAddress() != null,
                 "Not found the address of customer[id:%s]", customer2.getId());
 
@@ -151,6 +168,9 @@ public class BaseTest {
         assertEquals(padStart("7", 2, '0'), "07");
         assertEquals(padEnd("7", 2, '0'), "70");
 
+        assertEquals(commonSuffix("careful","beautiful"), "ful");
+        assertEquals(commonPrefix("regret","recollect"), "re");
+
         String str1 = LOWER_CAMEL.to(LOWER_UNDERSCORE, "someString");
         assertEquals(str1, "some_string");
 
@@ -181,11 +201,14 @@ public class BaseTest {
 
         Map<String, String> source = new TreeMap<>();
         source.put("xxx", "yyy");
+        source.put("iii", "jjj");
 
         StringBuilder sb = new StringBuilder();
         Joiner.on(',').withKeyValueSeparator("=").appendTo(sb, source);
+        assertEquals(sb.toString(), "iii=jjj,xxx=yyy");
 
-        assertEquals(sb.toString(), "xxx=yyy");
+        Joiner.on(',').skipNulls().appendTo(sb, "a", "b", "c");
+        assertEquals(sb.toString(), "iii=jjj,xxx=yyya,b,c");
 
         Map<String, String> dictionary = new HashMap<>();
         dictionary.put("key1", "value1");
@@ -298,6 +321,56 @@ public class BaseTest {
         }
 
         fail("No exception happened!");
+    }
+
+    @SuppressWarnings("static-access")
+    @Test
+    public void testOrdering() {
+        Ordering<String> byLengthOrdering = new Ordering<String>() {
+            @Override
+            public int compare(String left, String right) {
+                return Ints.compare(left.length(), right.length());
+            }
+        };
+
+        List<String> list = Lists.newArrayList("a", "aa", "aaa");
+
+        assertEquals(byLengthOrdering.isOrdered(list), true);
+        assertEquals(byLengthOrdering.reverse().isOrdered(list), false);
+
+        List<Double> numbers = Lists.newArrayList(0.2, 0.3, 0.1);
+
+        Ordering<Double> digitOrdering = new Ordering<Double>() {
+            @Override
+            public int compare(Double left, Double right) {
+                return Doubles.compare(left, right);
+            }
+        };
+
+        Comparator<Double> comparator = new Comparator<Double>() {
+            @Override
+            public int compare(Double o1, Double o2) {
+                return Doubles.compare(1 / o1, 1 / o2);
+            }
+        };
+
+        assertEquals(byLengthOrdering.from(comparator).isOrdered(numbers),
+                false);
+
+        assertEquals(digitOrdering.sortedCopy(numbers).toString(),
+                "[0.1, 0.2, 0.3]");
+        assertEquals(digitOrdering.reverse().sortedCopy(numbers).toString(),
+                "[0.3, 0.2, 0.1]");
+        assertEquals(digitOrdering.from(comparator).sortedCopy(numbers)
+                .toString(), "[0.3, 0.2, 0.1]");
+
+        assertEquals(
+                digitOrdering.reverse().explicit(numbers).sortedCopy(numbers)
+                        .toString(), "[0.2, 0.3, 0.1]");
+
+        assertEquals(
+                digitOrdering.reverse().compound(comparator)
+                        .sortedCopy(numbers).toString(), "[0.3, 0.2, 0.1]");
     }
 
     /* IO */
@@ -418,7 +491,11 @@ public class BaseTest {
         Map<String, State> stateMap = Maps.newHashMap();
         stateMap.put("NY", createState());
 
-        Function<String, State> lookupState = Functions.forMap(stateMap);
+//        Function<String, State> lookupState = Functions.forMap(stateMap);
+        Function<String, State> lookupState = Functions.forMap(stateMap,
+                new State("Unknown", Collections.emptySet()));
+        assertEquals(lookupState.apply("no-existed").getName(), "Unknown");
+
         Function<State, String> getCities = new Function<State, String>() {
             @Override
             public String apply(State input) {
@@ -431,6 +508,7 @@ public class BaseTest {
         String cities = getCities.apply(lookupState.apply("NY"));
 
         assertEquals(composed.apply("NY"), "Albany,Buffalo,NewYorkCity");
+        assertEquals(composed.apply("no-existed"), "");
         assertEquals(cities, composed.apply("NY"));
     }
 
@@ -468,6 +546,29 @@ public class BaseTest {
 
     @Test
     public void testSuppliers() {
+
+        final String RESULT = "result";
+        Stopwatch stopwatch = Stopwatch.createStarted();
+
+        Supplier<String> supplier = new Supplier<String>() {
+            @SneakyThrows
+            @Override
+            public String get() {
+                TimeUnit.SECONDS.sleep(2);
+                return RESULT;
+            }
+        };
+        assertEquals(supplier.get(), RESULT);
+        stopwatch.stop();
+        out.printf("time: %s%n", stopwatch);
+
+        stopwatch.reset().start();
+        // Suppliers.memoizeWithExpiration(supplier, 10L, TimeUnit.SECONDS);
+        Supplier<String> wrapped = Suppliers.memoize(supplier);
+        assertEquals(wrapped.get(), RESULT);
+        assertEquals(wrapped.get(), RESULT);
+        stopwatch.stop();
+        out.printf("time: %s%n", stopwatch);
 
         Function<Ingredients, Cake> bakeProcess = new Function<Ingredients, Cake>() {
             public Cake apply(Ingredients ingredients) {

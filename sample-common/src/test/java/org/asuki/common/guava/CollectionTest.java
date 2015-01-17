@@ -1,18 +1,20 @@
 package org.asuki.common.guava;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.partition;
 import static com.google.common.collect.Range.*;
+import static com.google.common.collect.Sets.cartesianProduct;
 import static com.google.common.collect.Sets.difference;
 import static com.google.common.collect.Sets.intersection;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.powerSet;
+import static com.google.common.collect.Sets.symmetricDifference;
 import static com.google.common.collect.Sets.union;
+import static java.lang.String.format;
 import static java.lang.System.out;
 import static org.testng.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -31,21 +33,27 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.ClassToInstanceMap;
+import com.google.common.collect.FluentIterable;
 //import com.google.common.collect.Constraints;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
@@ -55,6 +63,7 @@ import com.google.common.collect.PeekingIterator;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.RangeSet;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeRangeMap;
 import com.google.common.collect.TreeRangeSet;
@@ -66,6 +75,8 @@ public class CollectionTest {
     private Customer customer2 = new Customer(2, "Name2");
     private Customer customer3 = new Customer(3, "Name3");
     private Customer customer4 = new Customer(null, "Unknown");
+    private List<Customer> customers = newArrayList(
+            customer1, customer2, customer3, customer4);
 
     @Test
     public void testImmutable1() {
@@ -89,12 +100,31 @@ public class CollectionTest {
         // @formatter:off
         ImmutableSet<Customer> immutableBuilderSet = ImmutableSet.<Customer> builder()
                     .add(new Customer(11, "Google"))
-                    .add(new Customer(12, "Amazon"))
+                    .addAll(Lists.newArrayList(new Customer(12, "Amazon"), new Customer(13, "Facebook")))
                     .build();
         // @formatter:on
 
         assertEquals(immutableBuilderSet.toString(),
-                "[Customer{name=Google, id=11}, Customer{name=Amazon, id=12}]");
+                "[Customer{name=Google, id=11}, Customer{name=Amazon, id=12}, Customer{name=Facebook, id=13}]");
+
+        Map<String, String> map = Maps.newHashMap();
+        map.put("11", "Google");
+        map.put("12", "Amazon");
+
+        ImmutableMap<String, String> immutableMapByBuilder = ImmutableMap
+                .<String, String> builder().put("13", "Facebook").putAll(map)
+                .build();
+        assertEquals(immutableMapByBuilder.toString(),
+                "{13=Facebook, 11=Google, 12=Amazon}");
+
+        ImmutableMap<String, String> immutableMapByOf = ImmutableMap.of("11",
+                "Google", "12", "Amazon", "13", "Facebook");
+        assertEquals(immutableMapByOf.toString(),
+                "{11=Google, 12=Amazon, 13=Facebook}");
+
+        ImmutableMap<String, String> immutableMapByCopyOf = ImmutableMap
+                .copyOf(map);
+        assertEquals(immutableMapByCopyOf.toString(), "{11=Google, 12=Amazon}");
     }
 
     @Test
@@ -123,13 +153,19 @@ public class CollectionTest {
     @Test
     public void testLists() {
 
+        List<String> list = Lists.asList("a", new String[] { "b", "c" });
+        List<String> reverse = Lists.reverse(list);
+        assertEquals(reverse.toString(), "[c, b, a]");
+
         List<Integer> items = Arrays.asList(1, 2, 3, 4, 5, 6, 7);
-
-        List<List<Integer>> pages = partition(items, 3);
-
+        List<List<Integer>> pages = Lists.partition(items, 3);
         assertEquals(pages.toString(), "[[1, 2, 3], [4, 5, 6], [7]]");
+
+        ImmutableList<Character> characters = Lists.charactersOf("test");
+        assertEquals(characters.toString(), "[t, e, s, t]");
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testSets() {
 
@@ -151,7 +187,15 @@ public class CollectionTest {
 
         assertEquals(intersection(a, b).toString(), "[3]");
         assertEquals(difference(a, b).toString(), "[1, 2]");
+        assertEquals(symmetricDifference(a, b).toString(), "[1, 2, 4, 5]");
         assertEquals(union(a, b).toString(), "[1, 2, 3, 4, 5]");
+        assertEquals(cartesianProduct(a, b).toString(),
+                "[[1, 3], [1, 4], [1, 5], [2, 3], [2, 4], [2, 5], [3, 3], [3, 4], [3, 5]]");
+
+        List<Set<Integer>> setList = newArrayList();
+        powerSet(a).forEach(m -> setList.add(m));
+        assertEquals(setList.toString(),
+                "[[], [1], [2], [1, 2], [3], [1, 3], [2, 3], [1, 2, 3]]");
     }
 
     @Test
@@ -165,8 +209,77 @@ public class CollectionTest {
 
         SortedMap<String, String> filtered = Maps.filterValues(map,
                 Predicates.notNull());
-
         assertEquals(filtered.size(), 3);
+
+        filtered = Maps.filterKeys(map, input -> "2".equals(input));
+        assertEquals(filtered.toString(), "{2=two}");
+
+        filtered = Maps.filterEntries(map,
+                new Predicate<Map.Entry<String, String>>() {
+                    @Override
+                    public boolean apply(Map.Entry<String, String> input) {
+                        return "one".equals(input.getValue());
+                    }
+                });
+        assertEquals(filtered.toString(), "{1=one}");
+
+        Map<String, String> map1 = ImmutableMap.of("a", "1");
+        Map<String, String> map2 = ImmutableMap.of("b", "2");
+        Map<String, String> map3 = ImmutableMap.of("a", "3");
+        out.println(Maps.difference(map1, map2));
+        out.println(Maps.difference(map1, map3));
+
+        Function<String, String> function = input -> input.toUpperCase();
+
+        Set<String> set = Sets.newHashSet("a", "b", "c");
+        assertEquals(Maps.asMap(set, function).toString(), "{a=A, b=B, c=C}");
+
+        List<String> keys = Lists.newArrayList("a", "b", "c", "a");
+        assertEquals(Maps.toMap(keys, function).toString(), "{a=A, b=B, c=C}");
+
+        List<String> values = Lists.newArrayList("a", "b", "c", "d");
+        assertEquals(Maps.uniqueIndex(values, function).toString(),
+                "{A=a, B=b, C=c, D=d}");
+
+        Map<String, Boolean> fromMap = ImmutableMap.of("key1", true, "key2",
+                false);
+        assertEquals(Maps.transformValues(fromMap, input -> !input).toString(),
+                "{key1=false, key2=true}");
+
+        Maps.EntryTransformer<String, Boolean, String> entryTransformer = new Maps.EntryTransformer<String, Boolean, String>() {
+            @Override
+            public String transformEntry(String key, Boolean value) {
+                return value ? key : key.toUpperCase();
+            }
+        };
+        assertEquals(Maps.transformEntries(fromMap, entryTransformer)
+                .toString(), "{key1=key1, key2=KEY2}");
+    }
+
+    @Test
+    public void testFluentIterable() {
+        Iterable<Customer> filtered = FluentIterable.from(customers).filter(
+                new Predicate<Customer>() {
+                    @Override
+                    public boolean apply(Customer input) {
+                        return !"Unknown".equals(input.getName());
+                    }
+                });
+
+        assertEquals(
+                filtered.toString(),
+                "[Customer{name=Name1, id=1}, Customer{name=Name2, id=2}, Customer{name=Name3, id=3}]");
+
+        Iterable<String> transformed = FluentIterable.from(filtered).transform(
+                new Function<Customer, String>() {
+                    @Override
+                    public String apply(Customer input) {
+                        return Joiner.on("，").join(input.getId(),
+                                input.getName());
+                    }
+                });
+
+        assertEquals(transformed.toString(), "[1，Name1, 2，Name2, 3，Name3]");
     }
 
 //    @Test(expectedExceptions = NullPointerException.class)
@@ -186,11 +299,20 @@ public class CollectionTest {
     public void testMultimap() {
 
         Multimap<String, String> multiMap = ArrayListMultimap.create();
-        multiMap.put("key", "value1");
-        multiMap.put("key", "value2");
+        multiMap.put("key1", "value1");
+        multiMap.put("key1", "value1");
+        multiMap.put("key2", "value3");
+        multiMap.put("key2", "value4");
 
-        Collection<String> collection = multiMap.get("key");
-        assertEquals(collection.size(), 2);
+        assertEquals(multiMap.get("key1").toString(), "[value1, value1]");
+
+        Multimap<String, String> hashMultimap = HashMultimap.create(multiMap);
+        assertEquals(hashMultimap.get("key1").toString(), "[value1]");
+
+        Set<String> keys = multiMap.keySet();
+        assertEquals(keys.toString(), "[key1, key2]");
+        Multiset<String> multiKeys = multiMap.keys();
+        assertEquals(multiKeys.toString(), "[key1 x 2, key2 x 2]");
 
         // @formatter:off
         List<Customer> customers = Arrays.asList(
@@ -227,7 +349,13 @@ public class CollectionTest {
         biMap.put("key", "value");
 
         assertEquals(biMap.get("key"), "value");
-        assertEquals(biMap.inverse().get("value"), "key");
+
+        BiMap<String, String> inversed = biMap.inverse();
+        assertEquals(inversed.get("value"), "key");
+
+        biMap.forcePut("key2", "value");
+        assertEquals(biMap.get("key2"), "value");
+        assertEquals(inversed.get("value"), "key2");
 
         biMap.put("otherKey", "value");
 
@@ -257,6 +385,29 @@ public class CollectionTest {
                 .entrySet()) {
             out.println(entry.getKey() + "" + entry.getValue());
         }
+
+        Table<String, Integer, Integer> table = HashBasedTable.create();
+        table.put("A", 1, 100);
+        table.put("A", 2, 101);
+        table.put("B", 1, 200);
+        table.put("B", 2, 201);
+
+        assertEquals(table.contains("A", 3), false);
+        assertEquals(table.containsColumn(2), true);
+        assertEquals(table.containsRow("A"), true);
+        assertEquals(table.containsValue(201), true);
+
+        assertEquals(table.remove("A", 2), Integer.valueOf(101));
+        assertEquals(table.get("B", 2), Integer.valueOf(201));
+
+        assertEquals(table.column(2).toString(), "{B=201}");
+        assertEquals(table.row("B").toString(), "{1=200, 2=201}");
+
+        for (Table.Cell<String, Integer, Integer> cell : table.cellSet()) {
+            out.println(format("%s, %s, %s", cell.getRowKey(),
+                    cell.getColumnKey(), cell.getValue()));
+        }
+
     }
 
     @Test
@@ -376,9 +527,16 @@ public class CollectionTest {
 
         assertEquals(closed(3, 5).span(open(5, 10)).toString(), "[3‥10)");
         assertEquals(closed(1, 5).span(closed(7, 10)).toString(), "[1‥10]");
+
+        Function<Customer, Integer> idFunction = input -> input.getId();
+        Range<Integer> idRange = Range.closedOpen(100, 300);
+        Predicate<Customer> predicate = Predicates.compose(idRange, idFunction);
+
+        assertEquals(predicate.apply(new Customer(301, "Andy")), false);
+        assertEquals(predicate.apply(new Customer(101, "Tom")), true);
     }
 
-    @DataProvider(name = "rangeData")
+    @DataProvider
     private Object[][] rangeData() {
         // @formatter:off
         return new Object[][] { 
