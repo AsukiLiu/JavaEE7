@@ -1,4 +1,4 @@
-package org.asuki.common.guava;
+package org.asuki.common.guava.concurrent;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
