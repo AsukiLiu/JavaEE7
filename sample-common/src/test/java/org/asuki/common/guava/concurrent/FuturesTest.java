@@ -15,6 +15,7 @@ import org.asuki.common.guava.Customer;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.base.Function;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -139,6 +140,34 @@ public class FuturesTest {
         Futures.addCallback(listenableFuture, callback);
 
         assertThat(callback.getResult(), is("Task completed successfully"));
+    }
+
+    @Test
+    public void testFluentFuture() throws Exception {
+        // @formatter:off
+        ListenableFuture<Integer> future = FluentFuture
+                .from(1000)
+                //.from(1000, executor)
+                .transform(new Function<Integer, Double>() {
+                        public Double apply(Integer input) {
+                            return input * 2.0;
+                        }
+                    })
+                .transform(new AsyncFunction<Double, Integer>() {
+                        public ListenableFuture<Integer> apply(Double input)
+                                throws Exception {
+                            throw new Exception("Fail");
+                        }
+                    })
+                .withFallback(new FutureFallback<Integer>() {
+                        public ListenableFuture<Integer> create(Throwable t)
+                                throws Exception {
+                            return Futures.immediateFuture(-1);
+                        }
+                    });
+        // @formatter:on
+
+        assertThat(future.get(), is(-1));
     }
 
     private class FutureCallbackImpl implements FutureCallback<String> {

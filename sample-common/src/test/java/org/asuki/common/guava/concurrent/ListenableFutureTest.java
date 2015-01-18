@@ -1,5 +1,7 @@
 package org.asuki.common.guava.concurrent;
 
+import static java.lang.System.out;
+import static java.lang.Thread.currentThread;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
@@ -10,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -68,6 +71,44 @@ public class ListenableFutureTest {
         endSignal.await();
 
         assertThat(isCallbackRan, is(true));
+    }
+
+    @Test
+    public void testAddListeners() throws Exception {
+
+        ListenableFuture<String> futureTask = executorService
+                .submit(new Callable<String>() {
+                    @Override
+                    public String call() throws Exception {
+                        return " Task completed";
+                    }
+                });
+
+        futureTask.addListener(new Runnable() {
+            @SneakyThrows
+            @Override
+            public void run() {
+                out.println(currentThread().getName() + futureTask.get());
+
+                TimeUnit.SECONDS.sleep(1);
+
+                out.println("job1 completed");
+            }
+        }, executorService);// MoreExecutors.sameThreadExecutor());
+
+        futureTask.addListener(new Runnable() {
+            @SneakyThrows
+            @Override
+            public void run() {
+                out.println(currentThread().getName() + futureTask.get());
+
+                TimeUnit.SECONDS.sleep(1);
+
+                out.println("job2 completed");
+            }
+        }, executorService);// MoreExecutors.sameThreadExecutor());
+
+        TimeUnit.SECONDS.sleep(2);
     }
 
     @Test(dataProvider = "taskData")
