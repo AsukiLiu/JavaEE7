@@ -25,6 +25,7 @@ import lombok.SneakyThrows;
 
 import org.asuki.common.javase.model.Person;
 import org.asuki.common.javase.model.Student;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class Javase8Test {
@@ -236,6 +237,24 @@ public class Javase8Test {
 
         assertThat(converter.convert(persons).toString(),
                 is("[Student{name=Tom, age=20}, Student{name=Jack, age=30}]"));
+    }
+
+    @Test(dataProvider = "personData")
+    public void testPersonValidator(Person person, boolean result) {
+        PersonValidator validator = new PersonValidator();
+        assertThat(validator.test(person), is(result));
+    }
+
+    @DataProvider
+    private Object[][] personData() {
+        // @formatter:off
+        return new Object[][] { 
+            { new Person("Tom", 30), true },
+            { new Person(null, 30), false }, 
+            { new Person("", 30), false },
+            { new Person("Tom", 0), false } 
+        };
+        // @formatter:on
     }
 
 }
