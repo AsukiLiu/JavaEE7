@@ -13,9 +13,11 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
+import org.asuki.webservice.rs.annotation.Compress;
 import org.asuki.webservice.rs.data.DummyUserDatabase;
 import org.asuki.webservice.rs.entity.User;
 
+//http://localhost:8080/sample-web/rs/users/1
 @Path("users")
 @Consumes(APPLICATION_JSON)
 @Produces(APPLICATION_JSON)
@@ -24,6 +26,7 @@ public class UserResource {
     @PermitAll
     @GET
     @Path("{id}")
+    @Compress
     public Response getUser(@PathParam("id") int id) {
         User user = DummyUserDatabase.getUserById(id);
         return ok(user).build();
