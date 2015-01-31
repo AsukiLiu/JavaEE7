@@ -1,10 +1,14 @@
 package org.asuki.bv;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.asuki.bv.annotation.ForbiddenValues;
 import org.asuki.bv.annotation.NameDifferent;
+import org.asuki.bv.annotation.Past;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,4 +36,14 @@ public class ValueHolder {
         name = firstName + " " + lastName;
         return name;
     }
+
+    @Getter
+    @Setter
+    @Past
+    private LocalDate date;
+
+    @Getter
+    @Setter
+    @Past
+    private LocalDateTime dateTime;
 }
