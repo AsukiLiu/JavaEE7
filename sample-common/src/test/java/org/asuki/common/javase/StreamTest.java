@@ -1,13 +1,17 @@
 package org.asuki.common.javase;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.String.format;
 import static java.lang.System.out;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Locale;
@@ -16,6 +20,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -177,6 +182,15 @@ public class StreamTest {
     }
 
     @Test
+    public void testYieldLike() throws NoSuchAlgorithmException {
+        final int RANDOM_INTS = 5;
+
+        try (Stream<Integer> randomInt = generateRandomIntStream()) {
+            randomInt.limit(RANDOM_INTS).sorted().forEach(out::println);
+        }
+    }
+
+    @Test
     public void testParallelCaseA() {
         Integer[] array = { 9, 5, 10 };
         Arrays.parallelSort(array);
@@ -248,5 +262,29 @@ public class StreamTest {
         TimeUnit.SECONDS.sleep(1);
 
         out.print(t);
+    }
+
+    private static Stream<Integer> generateRandomIntStream()
+            throws NoSuchAlgorithmException {
+
+        return Stream.generate(new Supplier<Integer>() {
+
+            final SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+            boolean init = false;
+            int num = 0;
+
+            @Override
+            public Integer get() {
+                if (!init) {
+                    random.setSeed(new Date().getTime());
+                    init = true;
+                    out.println("init");
+                }
+                final int nextInt = random.nextInt();
+                out.println(format("Generated random %d: %d", num++, nextInt));
+                return nextInt;
+            }
+
+        });
     }
 }
