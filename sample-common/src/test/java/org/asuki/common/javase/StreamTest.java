@@ -24,8 +24,10 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import lombok.SneakyThrows;
+import lombok.ToString;
 
 import org.asuki.common.javase.model.Person;
 import org.asuki.common.javase.model.Student;
@@ -190,6 +192,35 @@ public class StreamTest {
         }
     }
 
+    // Entity to DTO
+    @Test
+    public void testMapping() {
+        List<Person> persons = newArrayList();
+        persons.add(new Person("Tom", 30));
+        persons.add(new Person("Jack", 25));
+
+        List<PersonDto> personDtos1 = StreamSupport
+                .stream(persons.spliterator(), false).map(PersonDto::new)
+                .collect(Collectors.toList());
+
+        List<PersonDto> personDtos2 = persons.stream().map(PersonDto::new)
+                .collect(Collectors.toList());
+
+        assertThat(personDtos1.toString(), is(personDtos2.toString()));
+    }
+
+    @ToString
+    private static class PersonDto {
+
+        private int age;
+        private String name;
+
+        public PersonDto(Person person) {
+            this.name = person.getName();
+            this.age = person.getAge();
+        }
+    }
+
     @Test
     public void testParallelCaseA() {
         Integer[] array = { 9, 5, 10 };
@@ -254,7 +285,7 @@ public class StreamTest {
 
         assertThat(
                 students.toString(),
-                is("[Person(name=Joe, age=20), Person(name=Jim, age=20), Person(name=John, age=20)]"));
+                is("[Student{name=Joe, age=20}, Student{name=Jim, age=20}, Student{name=John, age=20}]"));
     }
 
     @SneakyThrows
