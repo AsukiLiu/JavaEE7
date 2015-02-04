@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 //http://localhost:8080/sample-web/rs/camel
 @Path("camel")
 @Singleton
-@Startup
+//@Startup
 @Lock(LockType.READ)
 public class CamelRestService {
 

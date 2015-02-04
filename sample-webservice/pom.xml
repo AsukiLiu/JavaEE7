@@ -23,6 +23,11 @@
             <artifactId>sample-common</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.asuki</groupId>
+            <artifactId>sample-dao</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- Spec -->
         <dependency>
             <groupId>javax.enterprise</groupId>
