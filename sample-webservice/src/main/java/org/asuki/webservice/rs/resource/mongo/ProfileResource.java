@@ -7,16 +7,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import org.asuki.dao.mongo.ProfileDao;
+import org.asuki.webservice.rs.filter.annotation.AfterLogin;
+import org.asuki.webservice.rs.filter.annotation.EnableSession;
+import org.asuki.webservice.rs.filter.annotation.Authenticate;
 import org.slf4j.Logger;
 
 //http://localhost:8080/sample-web/rs/profiles
@@ -37,8 +42,17 @@ public class ProfileResource {
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @PermitAll
+    // @RolesAllowed("admin")
+    @EnableSession
+    @Authenticate
+    @AfterLogin
     public Response crud(ProfileRequest profileRequest) {
-        String username = profileRequest.getUsername();
+
+        if (!securityContext.isUserInRole("admin")) {
+            throw new WebApplicationException("Authorization failed", 403);
+        }
+
+        String username = securityContext.getUserPrincipal().getName();
         String detail = profileRequest.getDetail();
 
         profileDao.create(username, detail);

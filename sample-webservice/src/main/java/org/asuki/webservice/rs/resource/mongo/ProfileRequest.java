@@ -7,8 +7,6 @@ import lombok.Setter;
 @Setter
 public class ProfileRequest {
 
-    private String username;
-
     private String detail;
 
 }
