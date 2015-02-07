@@ -4,6 +4,9 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import org.slf4j.Logger;
 
 import com.mongodb.BasicDBObject;
@@ -22,6 +25,8 @@ public class ProfileDao {
     @Inject
     private DB db;
 
+    @Getter
+    @Setter
     private DBCollection profiles;
 
     @PostConstruct
@@ -32,14 +37,18 @@ public class ProfileDao {
     public void create(String username, String detail) {
         profiles.save(new BasicDBObject().append("username", username).append(
                 "detail", detail));
-
     }
 
-    public boolean isExisted(String username, String detail) {
+    public DBObject find(String username, String detail) {
         BasicDBObject query = new BasicDBObject("username", username).append(
                 "detail", detail);
         log.info("Query: {}", query.toString());
-        DBObject exists = profiles.findOne(query);
+
+        return profiles.findOne(query);
+    }
+
+    public boolean isExisted(String username, String detail) {
+        DBObject exists = find(username, detail);
         return exists != null;
     }
 
