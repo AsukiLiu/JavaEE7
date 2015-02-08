@@ -26,6 +26,8 @@ public class ConcurrencyHttpServlet extends HttpServlet {
 
         try {
             service.executeTasks();
+            service.executeByContextService();
+            service.executeByThreadFactory();
         } catch (InterruptedException | ExecutionException e) {
             throw new ServletException("thread error");
         }

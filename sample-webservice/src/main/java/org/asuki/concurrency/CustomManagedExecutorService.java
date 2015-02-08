@@ -6,8 +6,10 @@ import static javax.ejb.LockType.READ;
 import javax.annotation.Resource;
 import javax.ejb.Lock;
 import javax.ejb.Singleton;
+import javax.enterprise.concurrent.ContextService;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
+import javax.enterprise.concurrent.ManagedThreadFactory;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -17,8 +19,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 @Singleton
 @Lock(READ)
@@ -32,6 +39,12 @@ public class CustomManagedExecutorService {
 
     @Resource
     private ManagedScheduledExecutorService scheduledExecutor;
+
+    @Resource
+    private ContextService service;
+
+    @Resource
+    private ManagedThreadFactory threadFactory;
 
     private ScheduledFuture<?> future;
 
@@ -62,5 +75,29 @@ public class CustomManagedExecutorService {
         }
 
         future.cancel(true);
+    }
+
+    public void executeByContextService() throws InterruptedException,
+            ExecutionException {
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+        @SuppressWarnings("unchecked")
+        Callable<String> proxiedTask = service.createContextualProxy(
+                new CallableTaskA(1), Callable.class);
+
+        Future<String> result = executorService.submit(proxiedTask);
+        log.info(result.get());
+    }
+
+    public void executeByThreadFactory() throws InterruptedException,
+            ExecutionException {
+
+        ExecutorService executorService = new ThreadPoolExecutor(3, 3, 0L,
+                TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
+                threadFactory);
+
+        Future<String> result = executorService.submit(new CallableTaskB(2));
+        log.info(result.get());
     }
 }
