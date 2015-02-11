@@ -54,6 +54,7 @@ public class CustomManagedExecutorService {
         tasks.add(new CallableTaskA(1));
         tasks.add(new CallableTaskB(2));
 
+        //executor.submit(Callable/Runnable)
         List<Future<String>> taskResults = executor.invokeAll(tasks);
 
         List<String> results = new ArrayList<>();
@@ -93,6 +94,7 @@ public class CustomManagedExecutorService {
     public void executeByThreadFactory() throws InterruptedException,
             ExecutionException {
 
+        //threadFactory.newThread(Runnable).start();
         ExecutorService executorService = new ThreadPoolExecutor(3, 3, 0L,
                 TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
                 threadFactory);
