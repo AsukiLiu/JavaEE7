@@ -12,6 +12,7 @@ import javax.ws.rs.ext.ReaderInterceptorContext;
 import javax.ws.rs.ext.WriterInterceptor;
 import javax.ws.rs.ext.WriterInterceptorContext;
 
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 
 @Provider
@@ -40,6 +41,10 @@ public class CustomInterceptor implements ReaderInterceptor, WriterInterceptor {
             throws IOException, WebApplicationException {
 
         log.info("WriterInterceptor");
+
+        // Share context data
+        String contextData = ResteasyProviderFactory.popContextData(String.class);
+        log.info("Shared: {}", contextData);
 
         String methodName = currentThread().getStackTrace()[1].getMethodName();
 

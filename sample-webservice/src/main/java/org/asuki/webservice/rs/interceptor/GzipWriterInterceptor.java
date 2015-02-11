@@ -11,6 +11,7 @@ import javax.ws.rs.ext.WriterInterceptor;
 import javax.ws.rs.ext.WriterInterceptorContext;
 
 import org.asuki.webservice.rs.annotation.Compress;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 @Provider
 @Compress
@@ -19,6 +20,9 @@ public class GzipWriterInterceptor implements WriterInterceptor {
     @Override
     public void aroundWriteTo(WriterInterceptorContext context)
             throws IOException, WebApplicationException {
+
+        // Share context data
+        ResteasyProviderFactory.pushContext(String.class, "some context data");
 
         MultivaluedMap<String, Object> headers = context.getHeaders();
         headers.add("Content-Encoding", "gzip");
