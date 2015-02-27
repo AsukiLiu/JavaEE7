@@ -82,7 +82,42 @@ public class Javase8Test {
     }
 
     @Test
-    public void testMapExtension() {
+    public void testListExtension() {
+        List<String> list = new ArrayList<>(Arrays.asList("abc", "bcd", "cde"));
+
+        list.replaceAll(str -> str.toUpperCase());
+        assertThat(list.toString(), is("[ABC, BCD, CDE]"));
+
+        list.removeIf(str -> str.contains("B"));
+        assertThat(list.toString(), is("[CDE]"));
+    }
+
+    @Test
+    public void testMapExtensionCaseA() {
+        Map<String, String> map = new HashMap<>();
+        map.put("aaa", "AAA");
+        map.put("bbb", "BBB");
+        map.put("ccc", "CCC");
+
+        map.remove("aaa", "AAA");
+        map.remove("bbb", "*");
+        map.remove("*", "CCC");
+        assertThat(map.toString(), is("{ccc=CCC, bbb=BBB}"));
+
+        map.put("ddd", "DDD");
+
+        map.replace("bbb", "BBB", "REPLACE");
+        map.replace("ccc", "*", "NO REPLACE");
+        map.replace("*", "DDD", "NO REPLACE");
+        assertThat(map.toString(), is("{ccc=CCC, bbb=REPLACE, ddd=DDD}"));
+
+        map.replace("ddd", "REPLACE");
+        map.replace("*", "NO REPLACE");
+        assertThat(map.toString(), is("{ccc=CCC, bbb=REPLACE, ddd=REPLACE}"));
+    }
+
+    @Test
+    public void testMapExtensionCaseB() {
 
         Map<Integer, String> map = new HashMap<>();
         for (int i = 0; i < 10; i++) {
@@ -92,24 +127,25 @@ public class Javase8Test {
         map.forEach((key, value) -> out
                 .printf("Key: %s Value: %s ", key, value));
 
-        // Delete
-        map.computeIfPresent(4, (key, value) -> null);
-        assertThat(map.containsKey(4), is(false));
+        map.compute(6, (key, value) -> "<" + value + ">");
+        map.compute(7, (key, value) -> null);
+        map.compute(15, (key, value) -> "val15");
 
+        assertThat(map.get(6), is("<val6>"));
+        assertThat(map.get(7), is(nullValue()));
+        assertThat(map.get(15), is("val15"));
+
+        map.computeIfPresent(4, (key, value) -> null);
         map.computeIfPresent(3, (key, value) -> value + key);
+
+        assertThat(map.containsKey(4), is(false));
         assertThat(map.get(3), is("val33"));
 
         map.computeIfAbsent(3, value -> "aaa");
-        assertThat(map.get(3), is("val33"));
-
         map.computeIfAbsent(12, value -> "aaa");
-        assertThat(map.get(12), is("aaa"));
 
-        map.remove(3, "val3");
         assertThat(map.get(3), is("val33"));
-
-        map.remove(3, "val33");
-        assertThat(map.containsKey(3), is(false));
+        assertThat(map.get(12), is("aaa"));
 
         assertThat(map.getOrDefault(10, "not found"), is("not found"));
 

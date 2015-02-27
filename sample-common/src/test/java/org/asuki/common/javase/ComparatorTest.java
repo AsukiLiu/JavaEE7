@@ -3,6 +3,7 @@ package org.asuki.common.javase;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,24 +11,30 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.ToString;
 
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
 
 public class ComparatorTest {
 
-    @Test
-    public void testCompare() {
+    private List<ComparableTarget> list;
 
-        // @formatter:off
-
-        List<ComparableTarget> list = Lists.newArrayList(
+    @BeforeMethod
+    public void setup() {
+        list = Lists.newArrayList(
                 new ComparableTarget(22), 
                 new ComparableTarget(31), 
                 new ComparableTarget(21),
                 new ComparableTarget(12), 
                 new ComparableTarget(19)
         );
+    }
+
+    @Test
+    public void testCompareCaseA() {
+
+        // @formatter:off
 
         // Faster
         List<ComparableTarget> sortedList1 = list.stream()
@@ -53,6 +60,40 @@ public class ComparatorTest {
         assertThat(sortedList1.toString(), is(sortedList2.toString()));
         assertThat(sortedList1.toString(), is(sortedList3.toString()));
     }
+
+    @Test
+    public void testCompareCaseB() {
+
+        list.sort((s1, s2) -> s1.compareTo(s2));
+        String sortedString1 = list.toString();
+
+        list.sort(Comparator.comparing(e -> e.getC()));
+        String sortedString2 = list.toString();
+
+        list.sort(Comparator.comparing(ComparableTarget::getC));
+        String sortedString3 = list.toString();
+
+        assertThat(sortedString1.toString(), is(sortedString2.toString()));
+        assertThat(sortedString1.toString(), is(sortedString3.toString()));
+
+        Comparator<ComparableTarget> comparator = Comparator.comparing(e -> e
+                .getC());
+        list.sort(comparator.reversed());
+
+        Comparator<ComparableTarget> groupByComparator = Comparator
+                .comparing(ComparableTarget::getA)
+                .thenComparing(ComparableTarget::getB)
+                .thenComparing(ComparableTarget::getC);
+        list.sort(groupByComparator);
+        String sortedString4 = list.toString();
+
+        ComparableTarget[] array = list.toArray(new ComparableTarget[list
+                .size()]);
+        Arrays.parallelSort(array, groupByComparator);
+        String sortedString5 = Arrays.toString(array);
+
+        assertThat(sortedString4.toString(), is(sortedString5.toString()));
+    }
 }
 
 enum CustomComparator implements Comparator<ComparableTarget> {
@@ -72,7 +113,7 @@ enum CustomComparator implements Comparator<ComparableTarget> {
 }
 
 @ToString
-class ComparableTarget {
+class ComparableTarget implements Comparable<ComparableTarget> {
     @Getter
     private int a, b, c;
 
@@ -80,5 +121,10 @@ class ComparableTarget {
         a = i % 2;
         b = i % 10;
         c = i;
+    }
+
+    @Override
+    public int compareTo(ComparableTarget ct) {
+        return this.getC() - ct.getC();
     }
 }
