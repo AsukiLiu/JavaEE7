@@ -341,6 +341,22 @@ public class CollectionTest {
 
         multiSet.addAll(Arrays.asList("key", "other"));
         assertEquals(multiSet.count("key"), 3);
+
+        List<String> words = newArrayList("cat", "dog", "cat", "dog", "cat", "cat");
+        multiSet = HashMultiset.create(words);
+        assertEquals(multiSet.count("cat"), 4);
+        assertEquals(multiSet.count("dog"), 2);
+
+        multiSet.remove("cat");
+        assertEquals(multiSet.contains("cat"), true);
+        assertEquals(multiSet.count("cat"), 3);
+
+        multiSet.remove("cat", 3);
+        assertEquals(multiSet.contains("cat"), false);
+        assertEquals(multiSet.count("cat"), 0);
+
+        assertEquals(multiSet.toString(), "[dog x 2]");
+        assertEquals(multiSet.elementSet().toString(), "[dog]");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -356,6 +372,7 @@ public class CollectionTest {
         biMap.forcePut("key2", "value");
         assertEquals(biMap.get("key2"), "value");
         assertEquals(inversed.get("value"), "key2");
+        assertEquals(inversed.values().toString(), "[key2]");
 
         biMap.put("otherKey", "value");
 

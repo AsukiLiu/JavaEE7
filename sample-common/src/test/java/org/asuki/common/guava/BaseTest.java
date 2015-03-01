@@ -44,6 +44,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.beust.jcommander.internal.Maps;
@@ -75,9 +76,14 @@ import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import com.google.common.io.Flushables;
 import com.google.common.io.Resources;
+import com.google.common.math.IntMath;
+import com.google.common.math.LongMath;
 import com.google.common.net.InetAddresses;
+import com.google.common.primitives.Booleans;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
+import com.google.common.primitives.Longs;
+import com.google.common.primitives.Primitives;
 
 public class BaseTest {
 
@@ -194,6 +200,13 @@ public class BaseTest {
         joined = Joiner.on(":").join(parts);
         assertEquals(joined, "A:B:C");
 
+        Iterable<String> splitByLimit = Splitter.on(":").limit(2).split(joined);
+        assertEquals(splitByLimit.toString(), "[A, B:C]");
+
+        Iterable<String> splitByFixedLength = Splitter.fixedLength(2).split(
+                joined);
+        assertEquals(splitByFixedLength.toString(), "[A:, B:, C]");
+
         String[] array = new String[] { "aa", "bb", null, "cc" };
 
         assertEquals(Joiner.on(",").skipNulls().join(array), "aa,bb,cc");
@@ -279,18 +292,169 @@ public class BaseTest {
 
     @Test
     public void testPrimitives() {
+        Set<Class<?>> primitiveClazzSet = Primitives.allPrimitiveTypes();
+        out.println(primitiveClazzSet);
 
+        Set<Class<?>> wrapperClazzSet = Primitives.allWrapperTypes();
+        out.println(wrapperClazzSet);
+
+        assertEquals(Primitives.isWrapperType(double.class), false);
+        assertEquals(Primitives.isWrapperType(Double.class), true);
+        assertEquals(Primitives.isWrapperType(String.class), false);
+
+        assertEquals(Primitives.unwrap(Boolean.class), boolean.class);
+        assertEquals(Primitives.wrap(boolean.class), Boolean.class);
+    }
+
+    @Test
+    public void testInts() {
         Integer defaultValue = Defaults.defaultValue(int.class);
         assertEquals(defaultValue.intValue(), 0);
 
-        int[] array = new int[] { 1, 2, 3 };
+        int[] srcArray = { 1, 2, 3, 5 };
 
-        // Array⇒List
-        List<Integer> list = Ints.asList(array);
-        assertEquals(list.toString(), "[1, 2, 3]");
+        assertEquals(Ints.max(srcArray), 5);
+        assertEquals(Ints.min(srcArray), 1);
+        assertEquals(Ints.join(" : ", srcArray), "1 : 2 : 3 : 5");
 
-        assertEquals(Ints.max(array), 3);
-        assertEquals(Ints.join(" : ", array), "1 : 2 : 3");
+        assertEquals(Ints.contains(srcArray, 5), true);
+        assertEquals(Ints.contains(srcArray, 0), false);
+
+        assertEquals(Ints.compare(1, 2), -1);
+        assertEquals(Ints.compare(2, 1), 1);
+        assertEquals(Ints.compare(1, 1), 0);
+
+        // List<int[]> destList = Arrays.asList(srcArray);
+        List<Integer> destList = Ints.asList(srcArray);
+        assertEquals(destList.toString(), "[1, 2, 3, 5]");
+
+        // Integer[] destArray = (Integer[]) destList.toArray(new Integer[destList.size()]);
+        int[] destArray = Ints.toArray(destList);
+        assertEquals(Arrays.toString(destArray), "[1, 2, 3, 5]");
+
+        int[] srcArray2 = { 8, 9 };
+        int[] destArray2 = Ints.concat(srcArray, srcArray2);
+        assertEquals(Arrays.toString(destArray2), "[1, 2, 3, 5, 8, 9]");
+    }
+
+    @Test
+    public void testLongs() {
+        Long defaultValue = Defaults.defaultValue(long.class);
+        assertEquals(defaultValue.longValue(), 0L);
+
+        long[] srcArray = { 1L, 2L, 3L, 5L };
+
+        assertEquals(Longs.max(srcArray), 5L);
+        assertEquals(Longs.min(srcArray), 1L);
+        assertEquals(Longs.join(" : ", srcArray), "1 : 2 : 3 : 5");
+
+        assertEquals(Longs.contains(srcArray, 5L), true);
+        assertEquals(Longs.contains(srcArray, 0L), false);
+
+        assertEquals(Longs.compare(1L, 2L), -1);
+        assertEquals(Longs.compare(2L, 1L), 1);
+        assertEquals(Longs.compare(1L, 1L), 0);
+
+        // List<long[]> destList = Arrays.asList(srcArray);
+        List<Long> destList = Longs.asList(srcArray);
+        assertEquals(destList.toString(), "[1, 2, 3, 5]");
+
+        // Long[] destArray = (Long[]) destList.toArray(new Long[destList.size()]);
+        long[] destArray = Longs.toArray(destList);
+        assertEquals(Arrays.toString(destArray), "[1, 2, 3, 5]");
+
+        long[] srcArray2 = { 8L, 9L };
+        long[] destArray2 = Longs.concat(srcArray, srcArray2);
+        assertEquals(Arrays.toString(destArray2), "[1, 2, 3, 5, 8, 9]");
+    }
+
+    @Test
+    public void testDoubles() {
+        Double defaultValue = Defaults.defaultValue(double.class);
+        assertEquals(defaultValue.doubleValue(), 0.0);
+
+        double[] srcArray = { 1.1, 2.2, 3.3, 5.5 };
+
+        assertEquals(Doubles.max(srcArray), 5.5);
+        assertEquals(Doubles.min(srcArray), 1.1);
+        assertEquals(Doubles.join(" : ", srcArray), "1.1 : 2.2 : 3.3 : 5.5");
+
+        assertEquals(Doubles.contains(srcArray, 5.5), true);
+        assertEquals(Doubles.contains(srcArray, 0.0), false);
+
+        assertEquals(Doubles.compare(1.1, 2.2), -1);
+        assertEquals(Doubles.compare(2.2, 1.1), 1);
+        assertEquals(Doubles.compare(1.1, 1.1), 0);
+
+        // List<double[]> destList = Arrays.asList(srcArray);
+        List<Double> destList = Doubles.asList(srcArray);
+        assertEquals(destList.toString(), "[1.1, 2.2, 3.3, 5.5]");
+
+        // Double[] destArray = (Double[]) destList.toArray(new Double[destList.size()]);
+        double[] destArray = Doubles.toArray(destList);
+        assertEquals(Arrays.toString(destArray), "[1.1, 2.2, 3.3, 5.5]");
+
+        double[] srcArray2 = { 8.8, 9.9 };
+        double[] destArray2 = Doubles.concat(srcArray, srcArray2);
+        assertEquals(Arrays.toString(destArray2),
+                "[1.1, 2.2, 3.3, 5.5, 8.8, 9.9]");
+
+        assertEquals(Doubles.isFinite(1.9999), true);
+        assertEquals(Doubles.isFinite(Double.POSITIVE_INFINITY), false);
+        assertEquals(Doubles.isFinite(Double.NEGATIVE_INFINITY), false);
+        assertEquals(Doubles.isFinite(Double.NaN), false);
+    }
+
+    @Test
+    public void testBooleans() {
+        Boolean defaultValue = Defaults.defaultValue(boolean.class);
+        assertEquals(defaultValue.booleanValue(), false);
+
+        boolean[] srcArray = { true, false, true };
+
+        assertEquals(Booleans.join(" : ", srcArray), "true : false : true");
+
+        // List<boolean[]> destList = Arrays.asList(srcArray);
+        List<Boolean> destList = Booleans.asList(srcArray);
+        assertEquals(destList.toString(), "[true, false, true]");
+
+        // Boolean[] destArray = (Boolean[]) destList.toArray(new Boolean[destList.size()]);
+        boolean[] destArray = Booleans.toArray(destList);
+        assertEquals(Arrays.toString(destArray), "[true, false, true]");
+
+        boolean[] srcArray2 = { false, false };
+        boolean[] destArray2 = Booleans.concat(srcArray, srcArray2);
+        assertEquals(Arrays.toString(destArray2),
+                "[true, false, true, false, false]");
+    }
+
+    @Test(expectedExceptions = ArithmeticException.class, dataProvider = "checkedData")
+    public void testIntMathAndLongMath(Supplier<?> supplier) {
+        supplier.get();
+
+        fail("No exception happened!");
+    }
+
+    @DataProvider
+    private Object[][] checkedData() {
+        // @formatter:off
+
+        Supplier<?> checkedAddInt = () -> IntMath.checkedAdd(Integer.MAX_VALUE, 1);
+        Supplier<?> checkedSubtractInt = () -> IntMath.checkedSubtract(Integer.MIN_VALUE, 1);
+        Supplier<?> checkedMultiplyInt = () -> IntMath.checkedMultiply(Integer.MAX_VALUE, 5);
+        Supplier<?> checkedPowInt = () -> IntMath.checkedPow(Integer.MAX_VALUE, 2);
+
+        Supplier<?> checkedAddLong = () -> LongMath.checkedAdd(Long.MAX_VALUE, 1L);
+        Supplier<?> checkedSubtractLong = () -> LongMath.checkedSubtract(Long.MIN_VALUE, 1L);
+        Supplier<?> checkedMultiplyLong = () -> LongMath.checkedMultiply(Long.MAX_VALUE, 5L);
+        Supplier<?> checkedPowLong = () -> LongMath.checkedPow(Long.MAX_VALUE, 2);
+
+        return new Object[][] { 
+                { checkedAddInt }, { checkedSubtractInt }, { checkedMultiplyInt }, { checkedPowInt }, 
+                { checkedAddLong }, { checkedSubtractLong }, { checkedMultiplyLong }, { checkedPowLong }, 
+        };
+
+        // @formatter:on
     }
 
     @Test(expectedExceptions = RuntimeException.class)
