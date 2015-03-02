@@ -130,6 +130,8 @@
                             <targetPath>WEB-INF</targetPath>
                         </resource>
                     </webResources>
+                    <archiveClasses>true</archiveClasses>
+                    <attachClasses>true</attachClasses>
                 </configuration>
             </plugin>
             <!-- Unit test -->
