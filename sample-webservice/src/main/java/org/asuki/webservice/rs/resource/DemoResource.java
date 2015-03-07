@@ -4,7 +4,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.MediaType.TEXT_XML;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
@@ -28,10 +30,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.ResourceContext;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.asuki.webservice.rs.cache.CacheControlConfig;
 import org.asuki.webservice.rs.entity.Bean;
 import org.asuki.webservice.rs.entity.JsonResponse;
 import org.asuki.webservice.rs.entity.Names;
@@ -56,6 +60,17 @@ public class DemoResource extends BaseResource {
     @PostConstruct
     public void init() {
         this.savedBeans = new ConcurrentHashMap<>();
+    }
+
+    @Inject
+    @CacheControlConfig(maxAge = 20)
+    private CacheControl cc;
+
+    @GET
+    @Path("cache")
+    @Produces(TEXT_PLAIN)
+    public Response cache() {
+        return Response.ok(randomUUID().toString()).cacheControl(cc).build();
     }
 
     @GET
