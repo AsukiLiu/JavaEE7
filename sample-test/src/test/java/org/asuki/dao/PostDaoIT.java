@@ -12,8 +12,6 @@ import java.io.IOException;
 import org.asuki.common.Resources;
 import org.asuki.dao.PostDao;
 import org.asuki.model.cdi.VetoExtension;
-import org.asuki.model.converter.UuidToBytesConverter;
-import org.asuki.model.converter.ModeConverter;
 import org.asuki.model.entity.Comment;
 import org.asuki.model.entity.Post;
 import org.asuki.model.entity.CommentNegative;
@@ -54,12 +52,11 @@ public class PostDaoIT {
                 .create(WebArchive.class, "test.war")
                 .addPackages(true, 
                         "org.asuki.model.entity", 
+                        "org.asuki.model.converter", 
                         "org.asuki.dao")
                 .addClasses(
                         BaseEntityListener.class, 
                         Mode.class,
-                        UuidToBytesConverter.class, 
-                        ModeConverter.class, 
                         BaseEntityListener.class,
                         VetoExtension.class,
                         Resources.class)

@@ -10,7 +10,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 @Singleton
-//@Startup
+@Startup
 public class NamedQueryInitializer {
 
     @PersistenceContext
