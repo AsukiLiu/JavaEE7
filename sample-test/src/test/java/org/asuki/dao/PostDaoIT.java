@@ -10,6 +10,7 @@ import static org.hamcrest.MatcherAssert.*;
 import java.io.IOException;
 
 import org.asuki.common.Resources;
+import org.asuki.common.util.Cryptos;
 import org.asuki.dao.PostDao;
 import org.asuki.model.cdi.VetoExtension;
 import org.asuki.model.entity.Comment;
@@ -17,7 +18,6 @@ import org.asuki.model.entity.Post;
 import org.asuki.model.entity.CommentNegative;
 import org.asuki.model.entity.CommentPositive;
 import org.asuki.model.enums.Mode;
-import org.asuki.model.listener.BaseEntityListener;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
@@ -51,14 +51,10 @@ public class PostDaoIT {
         final WebArchive war = ShrinkWrap
                 .create(WebArchive.class, "test.war")
                 .addPackages(true, 
-                        "org.asuki.model.entity", 
-                        "org.asuki.model.converter", 
+                        "org.asuki.model",
                         "org.asuki.dao")
                 .addClasses(
-                        BaseEntityListener.class, 
-                        Mode.class,
-                        BaseEntityListener.class,
-                        VetoExtension.class,
+                        Cryptos.class,
                         Resources.class)
                 .addAsServiceProvider(Extension.class, VetoExtension.class)
                 .addAsWebInfResource("META-INF/jboss-deployment-structure.xml",
