@@ -252,6 +252,12 @@ public class Javase8Test {
         assertThat(optional.orElse("yyy"), is("abc"));
 
         optional.ifPresent((s) -> out.println(s.charAt(0)));
+
+        optional = Optional.ofNullable(null);
+
+        assertThat(optional.isPresent(), is(false));
+        assertThat(optional.orElseGet(() -> "none"), is("none"));
+        assertThat(optional.map(s -> s).orElse("none"), is("none"));
     }
 
     @Test

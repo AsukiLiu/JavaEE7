@@ -39,8 +39,7 @@ import com.google.common.collect.ImmutableList;
 public class StreamTest {
 
     @Test
-    public void testCaseA() {
-
+    public void testIntermediateOperation() {
         final List<String> list = ImmutableList.of("sa", "bb", "sc");
 
         List<String> oldWay = newArrayList();
@@ -58,8 +57,13 @@ public class StreamTest {
 
         list.stream().map(String::toUpperCase).sorted((a, b) -> b.compareTo(a))
                 .forEach(out::println);
+    }
 
-        Predicate<String> predicate = (s) -> s.startsWith("b");
+    @Test
+    public void testTerminalOperation() {
+        final List<String> list = ImmutableList.of("sa", "bb", "sc");
+
+        Predicate<String> predicate = s -> s.startsWith("s");
 
         assertThat(list.stream().anyMatch(predicate), is(true));
 
@@ -67,7 +71,9 @@ public class StreamTest {
 
         assertThat(list.stream().noneMatch(predicate), is(false));
 
-        assertThat(list.stream().filter(predicate).count(), is(1L));
+        assertThat(list.stream().filter(predicate).count(), is(2L));
+
+        assertThat(list.stream().filter(predicate).findFirst().get(), is("sa"));
 
         Optional<String> reduced = list.stream().sorted()
                 .reduce((s1, s2) -> s1 + "#" + s2);
@@ -78,7 +84,7 @@ public class StreamTest {
     }
 
     @Test
-    public void testCaseB() {
+    public void testConvertToCollection() {
 
         // @formatter:off
         List<Person> persons = Arrays.asList(
@@ -108,10 +114,14 @@ public class StreamTest {
 
         assertThat(nameString, is("Tom, John, John"));
 
-        List<String> names = persons.stream().map((p) -> p.getName())
+        List<String> nameList = persons.stream().map((p) -> p.getName())
                 .distinct().collect(Collectors.toList());
+        
+        String[] namesArray = persons.stream().map((p) -> p.getName())
+                .distinct().toArray(String[]::new);
 
-        assertThat(names.size(), is(2));
+        assertThat(nameList.size(), is(2));
+        assertThat(nameList.toString(), is(Arrays.toString(namesArray)));
 
         IntSummaryStatistics stats = persons.stream()
                 .mapToInt((p) -> p.getAge()).summaryStatistics();
@@ -122,7 +132,26 @@ public class StreamTest {
     }
 
     @Test
-    public void testCaseC() {
+    public void testCustomCollect() {
+        String[] strings = { "aaa", "bbb", "ccc" };
+
+        List<String> list = Stream.of(strings).collect(ArrayList::new,
+                ArrayList::add, ArrayList::addAll);
+
+        assertThat(list.toString(), is("[aaa, bbb, ccc]"));
+
+        String concat = Stream
+                .of(strings)
+                .collect(StringBuilder::new, StringBuilder::append,
+                        StringBuilder::append).toString();
+
+        assertThat(concat, is("aaabbbccc"));
+    }
+    
+    @Test
+    public void testCreate() {
+
+        Stream.generate(Date::new).limit(5).forEach(p -> out.println(p));
 
         Object[] powers = Stream.iterate(1.0, p -> p * 2)
                 .peek(e -> out.println(e)).limit(10).toArray();
@@ -167,23 +196,6 @@ public class StreamTest {
     }
 
     @Test
-    public void testCaseD() {
-        String[] strings = { "aaa", "bbb", "ccc" };
-
-        List<String> list = Stream.of(strings).collect(ArrayList::new,
-                ArrayList::add, ArrayList::addAll);
-
-        assertThat(list.toString(), is("[aaa, bbb, ccc]"));
-
-        String concat = Stream
-                .of(strings)
-                .collect(StringBuilder::new, StringBuilder::append,
-                        StringBuilder::append).toString();
-
-        assertThat(concat, is("aaabbbccc"));
-    }
-
-    @Test
     public void testYieldLike() throws NoSuchAlgorithmException {
         final int RANDOM_INTS = 5;
 
@@ -207,18 +219,6 @@ public class StreamTest {
                 .collect(Collectors.toList());
 
         assertThat(personDtos1.toString(), is(personDtos2.toString()));
-    }
-
-    @ToString
-    private static class PersonDto {
-
-        private int age;
-        private String name;
-
-        public PersonDto(Person person) {
-            this.name = person.getName();
-            this.age = person.getAge();
-        }
     }
 
     @Test
@@ -288,6 +288,18 @@ public class StreamTest {
                 is("[Student{name=Joe, age=20}, Student{name=Jim, age=20}, Student{name=John, age=20}]"));
     }
 
+    @ToString
+    private static class PersonDto {
+
+        private int age;
+        private String name;
+
+        public PersonDto(Person person) {
+            this.name = person.getName();
+            this.age = person.getAge();
+        }
+    }
+    
     @SneakyThrows
     private <T> void longRunProcess(T t) {
         TimeUnit.SECONDS.sleep(1);
