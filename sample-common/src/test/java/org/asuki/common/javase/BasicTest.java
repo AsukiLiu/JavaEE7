@@ -28,7 +28,7 @@ import org.asuki.common.javase.model.Student;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class Javase8Test {
+public class BasicTest {
 
     @Test
     public void testJoinString() {

@@ -7,10 +7,16 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.IntSummaryStatistics;
 import java.util.List;
@@ -18,6 +24,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -26,6 +33,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.ToString;
 
@@ -223,9 +232,6 @@ public class StreamTest {
 
     @Test
     public void testParallelCaseA() {
-        Integer[] array = { 9, 5, 10 };
-        Arrays.parallelSort(array);
-        assertThat(asList(array).toString(), is("[5, 9, 10]"));
 
         List<Integer> numbers = ImmutableList.of(9, 5, 10);
         assertThat(numbers.stream().sorted().collect(Collectors.toList())
@@ -288,6 +294,71 @@ public class StreamTest {
                 is("[Student{name=Joe, age=20}, Student{name=Jim, age=20}, Student{name=John, age=20}]"));
     }
 
+    @Test
+    public void testArrayParallel() {
+        long[] array = new long[2000];
+
+        Arrays.parallelSetAll(array, index -> ThreadLocalRandom.current()
+                .nextInt(10000));
+        Arrays.stream(array).limit(10).forEach(i -> out.print(i + " "));
+
+        out.println();
+
+        Arrays.parallelSort(array);
+        Arrays.stream(array).limit(10).forEach(i -> out.print(i + " "));
+
+        out.println();
+    }
+
+    @Test
+    public void testFiles() throws IOException {
+        Path path = new File("pom.xml").toPath();
+
+        try (Stream<String> lines = Files.lines(path, StandardCharsets.UTF_8)) {
+            lines.onClose(() -> out.println("Done!")).forEach(out::println);
+        }
+    }
+
+    @Test
+    public void testExample() {
+        Collection<Task> tasks = Arrays.asList(
+                new Task(Status.OPEN, 6),
+                new Task(Status.OPEN, 7), 
+                new Task(Status.CLOSE, 8));
+
+        int totalPointsOfOpenTasks = tasks.stream()
+                .filter(task -> task.getStatus() == Status.OPEN)
+                .mapToInt(Task::getPoints)
+                .sum();
+
+        assertThat(totalPointsOfOpenTasks, is(6 + 7));
+
+        int totalPoints = tasks.stream()
+                .parallel()
+                .map(task -> task.getPoints()) // Task::getPoints
+                .reduce(0, Integer::sum);
+
+        assertThat(totalPoints, is(6 + 7 + 8));
+
+        Map<Status, List<Task>> map = tasks.stream()
+                .collect(Collectors.groupingBy(Task::getStatus));
+
+        out.println(map);
+
+        // @formatter:off
+        Collection<String> result = tasks.stream()                      // Stream<String>
+                .mapToInt(Task::getPoints)                               // IntStream
+                .asLongStream()                                          // LongStream
+                .mapToDouble(points -> points / (double) totalPoints)  // DoubleStream
+                .boxed()                                                 // Stream<Double>
+                .mapToLong(weigth -> (long) (weigth * 100))             // LongStream
+                .mapToObj(percentage -> percentage + "%")               // Stream<String>
+                .collect(Collectors.toList());                           // List<String>
+        // @formatter:on
+
+        out.println(result);
+    }
+
     @ToString
     private static class PersonDto {
 
@@ -330,4 +401,17 @@ public class StreamTest {
 
         });
     }
+}
+
+enum Status {
+    OPEN, CLOSE
+};
+
+@AllArgsConstructor
+@ToString
+class Task {
+    @Getter
+    private final Status status;
+    @Getter
+    private final Integer points;
 }
