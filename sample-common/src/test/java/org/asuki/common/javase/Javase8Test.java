@@ -67,21 +67,6 @@ public class Javase8Test {
     }
 
     @Test
-    public void testDefaultMethod() {
-
-        // Formula formula = (num) -> sqrt(num * 100); // Compile error
-        Formula formula = new Formula() {
-            @Override
-            public double calculate(int num) {
-                return sqrt(num * 100);
-            }
-        };
-
-        assertThat(formula.calculate(100), is(100.0));
-        assertThat(formula.sqrt(16), is(4.0));
-    }
-
-    @Test
     public void testListExtension() {
         List<String> list = new ArrayList<>(Arrays.asList("abc", "bcd", "cde"));
 
