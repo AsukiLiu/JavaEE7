@@ -33,18 +33,18 @@
     <dependencies>
         <!-- Module -->
         <dependency>
-            <groupId>org.asuki</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>sample-web</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.asuki</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>sample-webservice</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.asuki</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>sample-dao</artifactId>
             <version>${project.version}</version>
         </dependency>
