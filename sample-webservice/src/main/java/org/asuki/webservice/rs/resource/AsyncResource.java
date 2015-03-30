@@ -2,11 +2,15 @@ package org.asuki.webservice.rs.resource;
 
 import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.security.PermitAll;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.container.AsyncResponse;
@@ -35,5 +39,33 @@ public class AsyncResource {
 
         Response response = Response.ok(bean).header("x-id", id).build();
         ar.resume(response);
+    }
+
+    @Path("/{timeout}")
+    @GET
+    @PermitAll
+    @Produces(TEXT_PLAIN)
+    public void send(@Suspended AsyncResponse response,
+            @PathParam("timeout") long seconds) {
+
+        // HTTP 503 after n seconds
+        response.setTimeout(seconds, TimeUnit.SECONDS);
+
+        // HTTP 408 after n seconds
+        response.setTimeoutHandler(asyncResp -> asyncResp.resume(Response
+                .status(Response.Status.REQUEST_TIMEOUT).build()));
+
+        new Thread(() -> {
+
+            try {
+                TimeUnit.SECONDS.sleep(3);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+            response.resume("Executed asynchronously");
+
+        }).start();
+
     }
 }

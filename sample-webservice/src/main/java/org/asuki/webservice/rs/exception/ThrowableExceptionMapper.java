@@ -12,7 +12,7 @@ import javax.ws.rs.ext.Provider;
 import org.asuki.webservice.rs.entity.JsonResponse;
 import org.slf4j.Logger;
 
-@Provider
+//@Provider
 public class ThrowableExceptionMapper implements ExceptionMapper<Throwable> {
 
     @Inject
