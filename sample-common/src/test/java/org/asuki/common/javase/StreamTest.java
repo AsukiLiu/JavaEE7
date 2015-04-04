@@ -8,13 +8,13 @@ import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.IntSummaryStatistics;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -30,6 +31,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -52,122 +54,7 @@ import com.google.common.collect.ImmutableList;
 public class StreamTest {
 
     @Test
-    public void testIntermediateOperation() {
-        final List<String> list = ImmutableList.of("sa", "bb", "sc");
-
-        List<String> oldWay = newArrayList();
-        for (String str : list) {
-            if (str.startsWith("s")) {
-                oldWay.add(str.toUpperCase());
-            }
-        }
-
-        // s -> s.toUpperCase()
-        List<String> newWay = list.stream().filter(s -> s.startsWith("s"))
-                .map(String::toUpperCase).collect(Collectors.toList());
-
-        assertThat(oldWay, is(newWay));
-
-        list.stream().map(String::toUpperCase).sorted((a, b) -> b.compareTo(a))
-                .forEach(out::println);
-
-        List<Integer> nums = IntStream.range(0, 5).boxed()
-                .collect(Collectors.toCollection(ArrayList::new));
-
-        assertThat(nums.toString(), is("[0, 1, 2, 3, 4]"));
-    }
-
-    @Test
-    public void testTerminalOperation() {
-        final List<String> list = ImmutableList.of("sa", "bb", "sc");
-
-        Predicate<String> predicate = s -> s.startsWith("s");
-
-        assertThat(list.stream().anyMatch(predicate), is(true));
-
-        assertThat(list.stream().allMatch(predicate), is(false));
-
-        assertThat(list.stream().noneMatch(predicate), is(false));
-
-        assertThat(list.stream().filter(predicate).count(), is(2L));
-
-        assertThat(list.stream().filter(predicate).findFirst().get(), is("sa"));
-
-        Optional<String> reduced = list.stream().sorted()
-                .reduce((s1, s2) -> s1 + "#" + s2);
-
-        reduced.ifPresent(out::println);
-
-        assertThat(reduced.get(), is("bb#sa#sc"));
-    }
-
-    @Test
-    public void testConvertToCollection() {
-
-        // @formatter:off
-        List<Person> persons = Arrays.asList(
-                new Person("Tom", 20), 
-                new Person("John", 40), 
-                new Person("John", 30));
-        // @formatter:on
-
-        Optional<Person> minAgePerson = persons.stream().min(
-                (p1, p2) -> Integer.compare(p1.getAge(), p2.getAge()));
-        assertThat(minAgePerson.isPresent(), is(true));
-        assertThat(minAgePerson.get().toString(),
-                is("Person(name=Tom, age=20)"));
-
-        Map<Integer, String> peoples = persons.stream().collect(
-                Collectors.toMap(Person::getAge, Person::getName));
-        assertThat(peoples.toString(), is("{20=Tom, 40=John, 30=John}"));
-
-        ConcurrentMap<String, List<Person>> result = persons.stream()
-                .parallel()
-                .collect(Collectors.groupingByConcurrent(Person::getName));
-        assertThat(result.get("Tom").size(), is(1));
-        assertThat(result.get("John").size(), is(2));
-
-        String nameString = persons.stream().map((p) -> p.getName())
-                .collect(Collectors.joining(", "));
-
-        assertThat(nameString, is("Tom, John, John"));
-
-        List<String> nameList = persons.stream().map((p) -> p.getName())
-                .distinct().collect(Collectors.toList());
-        
-        String[] namesArray = persons.stream().map((p) -> p.getName())
-                .distinct().toArray(String[]::new);
-
-        assertThat(nameList.size(), is(2));
-        assertThat(nameList.toString(), is(Arrays.toString(namesArray)));
-
-        IntSummaryStatistics stats = persons.stream()
-                .mapToInt((p) -> p.getAge()).summaryStatistics();
-
-        assertThat(
-                stats.toString(),
-                is("IntSummaryStatistics{count=3, sum=90, min=20, average=30.000000, max=40}"));
-    }
-
-    @Test
-    public void testCustomCollect() {
-        String[] strings = { "aaa", "bbb", "ccc" };
-
-        List<String> list = Stream.of(strings).collect(ArrayList::new,
-                ArrayList::add, ArrayList::addAll);
-
-        assertThat(list.toString(), is("[aaa, bbb, ccc]"));
-
-        String concat = Stream
-                .of(strings)
-                .collect(StringBuilder::new, StringBuilder::append,
-                        StringBuilder::append).toString();
-
-        assertThat(concat, is("aaabbbccc"));
-    }
-    
-    @Test
-    public void testCreate() {
+    public void testSourceOperation() {
 
         Stream.generate(Date::new).limit(5).forEach(p -> out.println(p));
 
@@ -211,6 +98,240 @@ public class StreamTest {
                 .groupingBy(Locale::getCountry));
         List<Locale> swissLocales = countryToLocales.get("CH");
         assertThat(swissLocales.toString(), is("[fr_CH, de_CH, it_CH]"));
+
+        assertThat(
+                eachByStreamBuilder("abcd").collect(Collectors.joining("-")),
+                is("a-b-c-d"));
+        assertThat(
+                eachBySurrogatePair("abcd").collect(Collectors.joining("-")),
+                is("a-b-c-d"));
+    }
+
+    private static Stream<String> eachByStreamBuilder(String str) {
+        Stream.Builder<String> sb = Stream.builder();
+        for (int i = 0; i < str.length(); i++) {
+            sb.add(str.charAt(i) + "");
+        }
+        return sb.build();
+    }
+
+    private static Stream<String> eachBySurrogatePair(String str) {
+        // str.chars()
+        return str.codePoints().boxed()
+                .map(i -> String.valueOf(Character.toChars(i)));
+    }
+
+    @Test
+    public void testIntermediateOperation() {
+        {
+            final List<String> list = ImmutableList.of("sa", "bb", "sc");
+
+            // s -> s.toUpperCase()
+            List<String> newWay = list.stream().filter(s -> s.startsWith("s"))
+                    .map(String::toUpperCase).collect(Collectors.toList());
+
+            assertThat(newWay.toString(), is("[SA, SC]"));
+
+            list.stream().map(String::toUpperCase)
+                    .sorted((a, b) -> b.compareTo(a)).forEach(out::println);
+        }
+
+        List<Integer> nums = IntStream.range(0, 5).boxed()
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        assertThat(nums.toString(), is("[0, 1, 2, 3, 4]"));
+
+        {
+            List<List<String>> collection = asList(asList("aa", "bb"),
+                    asList("cc", "dd", "ee"));
+
+            List<String> list = collection.stream()
+                    .flatMap(value -> value.stream())
+                    .collect(Collectors.toList());
+
+            assertThat(list.toString(), is("[aa, bb, cc, dd, ee]"));
+        }
+
+        {
+            Function<Integer, Stream<Integer>> repeat = n -> Stream.generate(
+                    () -> n).limit(n);
+
+            List<Integer> list = Arrays.asList(0, 1, 2, 4).stream()
+                    .flatMap(repeat)
+                    // .flatMap(repeat)
+                    .collect(Collectors.toList());
+
+            assertThat(list.toString(), is("[1, 2, 2, 4, 4, 4, 4]"));
+        }
+
+        {
+            Function<Integer, Stream<String>> dual = i -> IntStream.range(0, 3)
+                    .boxed().map(j -> i + ":" + j);
+
+            List<String> list = IntStream.range(0, 3).boxed().flatMap(dual)
+                    .collect(Collectors.toList());
+
+            assertThat(list.toString(),
+                    is("[0:0, 0:1, 0:2, 1:0, 1:1, 1:2, 2:0, 2:1, 2:2]"));
+        }
+
+        {
+            List<Person> persons = Arrays.asList(new Person("Tom", 27),
+                    new Person("John", 38));
+
+            double avg1 = persons.stream().reduce(0.0,
+                    (acc, u) -> acc + u.getAge(), (r1, r2) -> r1 + r2)
+                    / persons.size();
+
+            double avg2 = persons.stream().collect(
+                    Collectors.averagingInt(Person::getAge));
+
+            double avg3 = persons.stream().mapToInt(Person::getAge).average()
+                    .getAsDouble();
+
+            assertThat(avg1, is(avg2));
+            assertThat(avg1, is(avg3));
+        }
+    }
+
+    @Test
+    public void testTerminalOperation() {
+        final List<String> list = ImmutableList.of("sa", "bb", "sc");
+
+        Predicate<String> predicate = s -> s.startsWith("s");
+
+        assertThat(list.stream().anyMatch(predicate), is(true));
+
+        assertThat(list.stream().allMatch(predicate), is(false));
+
+        assertThat(list.stream().noneMatch(predicate), is(false));
+
+        assertThat(list.stream().filter(predicate).count(), is(2L));
+
+        assertThat(list.stream().filter(predicate).findFirst().get(), is("sa"));
+
+        Optional<String> reduced = list.stream().sorted()
+                .reduce((s1, s2) -> s1 + "#" + s2);
+
+        reduced.ifPresent(out::println);
+
+        assertThat(reduced.get(), is("bb#sa#sc"));
+
+        String str = Stream.of("AB", "CD", "EF").reduce((a, b) -> b + a).get();
+        assertThat(str, is("EFCDAB"));
+    }
+
+    @Test
+    public void testConvertToCollection() {
+
+        // @formatter:off
+        List<Person> persons = Arrays.asList(
+                new Person("Tom", 20), 
+                new Person("John", 40), 
+                new Person("John", 30));
+        // @formatter:on
+
+        Optional<Person> minAgePerson = persons.stream().min(
+                (p1, p2) -> Integer.compare(p1.getAge(), p2.getAge()));
+        assertThat(minAgePerson.isPresent(), is(true));
+        assertThat(minAgePerson.get().toString(),
+                is("Person(name=Tom, age=20)"));
+
+        Map<Integer, String> peoples = persons.stream().collect(
+                Collectors.toMap(Person::getAge, Person::getName));
+        assertThat(peoples.toString(), is("{20=Tom, 40=John, 30=John}"));
+
+        ConcurrentMap<String, List<Person>> result = persons.stream()
+                .parallel()
+                .collect(Collectors.groupingByConcurrent(Person::getName));
+        assertThat(result.get("Tom").size(), is(1));
+        assertThat(result.get("John").size(), is(2));
+
+        {
+            Stream<String> str = persons.stream().map((p) -> p.getName());
+
+            assertThat(str.collect(Collectors.joining()), is("TomJohnJohn"));
+
+            str = persons.stream().map((p) -> p.getName());
+            assertThat(str.collect(Collectors.joining(", ")),
+                    is("Tom, John, John"));
+
+            str = persons.stream().map((p) -> p.getName());
+            assertThat(str.collect(Collectors.joining(", ", "[", "]")),
+                    is("[Tom, John, John]"));
+        }
+
+        List<String> nameList = persons.stream().map((p) -> p.getName())
+                .distinct().collect(Collectors.toList());
+        
+        String[] namesArray = persons.stream().map((p) -> p.getName())
+                .distinct().toArray(String[]::new);
+
+        assertThat(nameList.size(), is(2));
+        assertThat(nameList.toString(), is(Arrays.toString(namesArray)));
+
+        IntSummaryStatistics stats = persons.stream()
+                .mapToInt((p) -> p.getAge()).summaryStatistics();
+
+        assertThat(
+                stats.toString(),
+                is("IntSummaryStatistics{count=3, sum=90, min=20, average=30.000000, max=40}"));
+
+        {
+            int sumAge1 = persons.stream().collect(
+                    Collectors.summingInt(p -> p.getAge()));
+
+            int sumAge2 = persons.stream().reduce(0,
+                    (acc, u) -> acc + u.getAge(), (a1, a2) -> a1 + a2);
+
+            assertThat(sumAge1, is(sumAge2));
+        }
+
+        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6);
+
+        {
+            Map<Boolean, List<Integer>> map = list.stream().collect(
+                    Collectors.partitioningBy(n -> (int) n % 2 == 0));
+
+            assertThat(map.toString(), is("{false=[1, 3, 5], true=[2, 4, 6]}"));
+        }
+
+        {
+            Map<Integer, Double> map = list.stream().collect(
+                    Collectors.groupingBy(n -> n % 3,
+                            Collectors.averagingDouble(n -> (int) n + 0.0)));
+
+            assertThat(map.toString(), is("{0=4.5, 1=2.5, 2=3.5}"));
+        }
+
+        {
+            List<String> members = Arrays.asList("b0001", "a0001", "d0002",
+                    "c0003", "a0002");
+
+            Map<Character, List<String>> group = members.stream().collect(
+                    Collectors.groupingBy(s -> s.charAt(0), LinkedHashMap::new,
+                            Collectors.toList()));
+
+            group.forEach((k, v) -> out.println(k + " = " + v));
+        }
+
+    }
+
+    @Test
+    public void testCustomCollect() {
+        String[] strings = { "aaa", "bbb", "ccc" };
+
+        List<String> list = Stream.of(strings).collect(ArrayList::new,
+                ArrayList::add, ArrayList::addAll);
+
+        assertThat(list.toString(), is("[aaa, bbb, ccc]"));
+
+        String concat = Stream
+                .of(strings)
+                .collect(StringBuilder::new, StringBuilder::append,
+                        StringBuilder::append).toString();
+
+        assertThat(concat, is("aaabbbccc"));
     }
 
     @Test
@@ -322,7 +443,9 @@ public class StreamTest {
     @Test
     public void testFiles() throws IOException {
         // Path path = new File("pom.xml").toPath();
-        Path path = Paths.get("pom.xml");
+        // Path path = Paths.get("pom.xml");
+        FileSystem fs = FileSystems.getDefault();
+        Path path = fs.getPath("pom.xml");
 
         List<String> lines = new ArrayList<>();
 
