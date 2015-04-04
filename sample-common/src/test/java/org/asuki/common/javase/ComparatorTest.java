@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -73,8 +74,29 @@ public class ComparatorTest {
         list.sort(Comparator.comparing(ComparableTarget::getC));
         String sortedString3 = list.toString();
 
+        Collections.sort(list, (s1, s2) -> s1.compareTo(s2));
+        String sortedString4 = list.toString();
+
+        Collections.sort(list, Comparator.naturalOrder());
+        String sortedString5 = list.toString();
+
+        Collections.sort(list, (s1, s2) -> s2.compareTo(s1));
+        String sortedString6 = list.toString();
+
+        Collections.sort(list, Comparator.reverseOrder());
+        String sortedString7 = list.toString();
+
         assertThat(sortedString1.toString(), is(sortedString2.toString()));
         assertThat(sortedString1.toString(), is(sortedString3.toString()));
+        assertThat(sortedString1.toString(), is(sortedString4.toString()));
+        assertThat(sortedString1.toString(), is(sortedString5.toString()));
+
+        assertThat(sortedString1.toString(), is(not(sortedString6.toString())));
+        assertThat(sortedString6.toString(), is(sortedString7.toString()));
+    }
+
+    @Test
+    public void testCompareCaseC() {
 
         Comparator<ComparableTarget> comparator = Comparator.comparing(e -> e
                 .getC());
@@ -85,14 +107,14 @@ public class ComparatorTest {
                 .thenComparing(ComparableTarget::getB)
                 .thenComparing(ComparableTarget::getC);
         list.sort(groupByComparator);
-        String sortedString4 = list.toString();
+        String sortedString1 = list.toString();
 
         ComparableTarget[] array = list.toArray(new ComparableTarget[list
                 .size()]);
         Arrays.parallelSort(array, groupByComparator);
-        String sortedString5 = Arrays.toString(array);
+        String sortedString2 = Arrays.toString(array);
 
-        assertThat(sortedString4.toString(), is(sortedString5.toString()));
+        assertThat(sortedString1.toString(), is(sortedString2.toString()));
     }
 }
 

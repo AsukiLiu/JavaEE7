@@ -51,6 +51,11 @@ public class BasicTest {
 
         csv = strings.stream().reduce((t, u) -> t + separator + u).get();
         assertThat(csv, is(expected));
+
+        joiner = new StringJoiner(":", "[", "]");
+        joiner.add("aaa").add("bbb");
+
+        assertThat(joiner.toString(), is("[aaa:bbb]"));
     }
 
     @SneakyThrows
@@ -234,15 +239,15 @@ public class BasicTest {
 
         assertThat(optional.isPresent(), is(true));
         assertThat(optional.get(), is("abc"));
-        assertThat(optional.orElse("yyy"), is("abc"));
-
-        optional.ifPresent((s) -> out.println(s.charAt(0)));
+        assertThat(optional.orElse("none"), is("abc"));
+        assertThat(optional.map(s -> s.toUpperCase()).orElse("none"), is("ABC"));
+        assertThat(optional.flatMap(s -> Optional.of(s.toUpperCase())).orElse("none"), is("ABC"));
+        assertThat(optional.filter(s -> s.length() > 5).orElse("none"), is("none"));
 
         optional = Optional.ofNullable(null);
 
         assertThat(optional.isPresent(), is(false));
         assertThat(optional.orElseGet(() -> "none"), is("none"));
-        assertThat(optional.map(s -> s).orElse("none"), is("none"));
     }
 
     @Test

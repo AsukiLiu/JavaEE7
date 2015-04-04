@@ -7,11 +7,14 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -26,6 +29,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -66,6 +70,11 @@ public class StreamTest {
 
         list.stream().map(String::toUpperCase).sorted((a, b) -> b.compareTo(a))
                 .forEach(out::println);
+
+        List<Integer> nums = IntStream.range(0, 5).boxed()
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        assertThat(nums.toString(), is("[0, 1, 2, 3, 4]"));
     }
 
     @Test
@@ -312,11 +321,37 @@ public class StreamTest {
 
     @Test
     public void testFiles() throws IOException {
-        Path path = new File("pom.xml").toPath();
+        // Path path = new File("pom.xml").toPath();
+        Path path = Paths.get("pom.xml");
 
-        try (Stream<String> lines = Files.lines(path, StandardCharsets.UTF_8)) {
-            lines.onClose(() -> out.println("Done!")).forEach(out::println);
+        List<String> lines = new ArrayList<>();
+
+        Consumer<String> replace = l -> lines.add(l.replaceAll("<", "(")
+                .replaceAll(">", ")"));
+
+        // ★Approach one
+        // Files.lines(path, StandardCharsets.UTF_8).forEach(replace);
+        try (Stream<String> stream = Files.lines(path, StandardCharsets.UTF_8)) {
+            stream.onClose(() -> out.println("Done!")).forEach(replace);
         }
+
+        int size1 = lines.size();
+
+        lines.clear();
+
+        // ★Approach two
+        try (BufferedReader br = Files.newBufferedReader(path,
+                Charset.forName("UTF-8"))) {
+            br.lines().forEach(replace);
+        }
+
+        int size2 = lines.size();
+
+        List<String> allLines = Files
+                .readAllLines(path, StandardCharsets.UTF_8);
+
+        assertThat(size1, is(allLines.size()));
+        assertThat(size2, is(allLines.size()));
     }
 
     @Test
