@@ -1,29 +1,29 @@
 package org.asuki.common.javase.lock;
 
-import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.atomic.LongAccumulator;
 
 import com.google.common.base.Objects;
 
-public class AdderSpaceship implements Spaceship {
+public class AccumulatorSpaceship implements Spaceship {
 
-    private final LongAdder x = new LongAdder();
-    private final LongAdder y = new LongAdder();
+    private final LongAccumulator x = new LongAccumulator((x, y) -> x + y, 0L);
+    private final LongAccumulator y = new LongAccumulator((x, y) -> x + y, 0L);
 
     @Override
     public int read(int[] coordinates) {
         // coordinates[0] = x.intValue();
         // coordinates[1] = y.intValue();
 
-        coordinates[0] = (int) x.sum();
-        coordinates[1] = (int) y.sum();
+        coordinates[0] = (int) x.get();
+        coordinates[1] = (int) y.get();
 
         return 1;
     }
 
     @Override
     public int write(int xDelta, int yDelta) {
-        x.add(xDelta);
-        y.add(yDelta);
+        x.accumulate(xDelta);
+        y.accumulate(yDelta);
 
         return 1;
     }
