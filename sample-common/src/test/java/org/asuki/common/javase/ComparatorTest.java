@@ -98,6 +98,10 @@ public class ComparatorTest {
     @Test
     public void testCompareCaseC() {
 
+        ComparableTarget target = list.stream()
+                .max(Comparator.comparing(ComparableTarget::getC)).get();
+        assertThat(target.getC(), is(31));
+
         Comparator<ComparableTarget> comparator = Comparator.comparing(e -> e
                 .getC());
         list.sort(comparator.reversed());

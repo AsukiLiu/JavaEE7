@@ -46,6 +46,8 @@ import lombok.ToString;
 
 import org.asuki.common.javase.model.Person;
 import org.asuki.common.javase.model.Student;
+import org.asuki.common.util.StreamUtil;
+import org.asuki.common.util.StreamUtil.Pair;
 import org.testng.annotations.Test;
 
 import com.google.common.base.Stopwatch;
@@ -291,7 +293,7 @@ public class StreamTest {
 
         {
             Map<Boolean, List<Integer>> map = list.stream().collect(
-                    Collectors.partitioningBy(n -> (int) n % 2 == 0));
+                    Collectors.partitioningBy(n -> n % 2 == 0));
 
             assertThat(map.toString(), is("{false=[1, 3, 5], true=[2, 4, 6]}"));
         }
@@ -475,6 +477,53 @@ public class StreamTest {
 
         assertThat(size1, is(allLines.size()));
         assertThat(size2, is(allLines.size()));
+    }
+
+    @Test
+    public void testStreamUtil() {
+        Consumer<Pair<Integer, Integer>> print = p -> out.println(format(
+                "First:%d, Second:%d [%s]", p.getFirst(), p.getSecond(),
+                Thread.currentThread()));
+
+        {
+            List<Integer> list1 = Arrays.asList(0, 1, 1, 0, 1);
+            List<Integer> list2 = Arrays.asList(1, 1, 0, 0, 1);
+
+            Optional<Pair<Integer, Integer>> hit = StreamUtil
+                    .zip(list1.stream(), list2.stream())
+                    .peek(print)
+                    .filter(p -> p.getFirst().equals(1)
+                            && p.getFirst().equals(p.getSecond())).findFirst();
+
+            assertThat(hit.isPresent() ? hit.get().toString() : "none",
+                    is("StreamUtil.Pair(first=1, second=1)"));
+        }
+
+        {
+            List<Integer> input = Arrays.asList(1, 2, 3, 4, 5, 6);
+            int sum = StreamUtil
+                    .zip(input.stream(), Stream.iterate(0, n -> n + 1))
+                    .parallel()
+                    // .peek(print)
+                    .filter(p -> p.getSecond() % 2 == 1)
+                    .collect(Collectors.summingInt(p -> p.getFirst()));
+
+            assertThat(sum, is(2 + 4 + 6));
+        }
+
+        {
+            print = p -> out.println(format("First:%c, Second:%c", (char) p
+                    .getFirst().intValue(), (char) p.getSecond().intValue()));
+
+            String str = "ABCAABBCCCDEEF";
+            long count = StreamUtil
+                    .zip(str.chars().boxed(), str.chars().skip(1).boxed(),
+                            str.length() - 1)
+                    .peek(print)
+                    .filter(p -> p.getFirst().equals(p.getSecond())).count();
+
+            assertThat(count, is(5L));
+        }
     }
 
     @Test
