@@ -15,11 +15,13 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.IntSummaryStatistics;
 import java.util.LinkedHashMap;
@@ -477,6 +479,24 @@ public class StreamTest {
 
         assertThat(size1, is(allLines.size()));
         assertThat(size2, is(allLines.size()));
+    }
+
+    @Test
+    public void testFiles2() throws IOException {
+        Path path = Paths.get("pom.xml");
+
+        // Find the 5 most frequent words in a file
+        List<String> words = Files.lines(path)
+            .parallel()
+            .flatMap(line -> Arrays.asList(line.split("\\b")).stream())
+            .collect(Collectors.groupingBy(w -> w, Collectors.counting()))
+            .entrySet().stream()
+            .sorted(Comparator.comparing(Map.Entry<String, Long>::getValue).reversed())
+            .limit(5)
+            .map(Map.Entry::getKey)
+            .collect(Collectors.toList());
+
+        words.forEach(out::println);
     }
 
     @Test
