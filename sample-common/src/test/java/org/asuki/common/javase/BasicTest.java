@@ -31,6 +31,40 @@ import org.testng.annotations.Test;
 public class BasicTest {
 
     @Test
+    public void testCast() {
+        Object obj = 3;
+
+        Integer objAsInt1 = staticCast1(obj);
+        Integer objAsInt2 = staticCast2(obj);
+        Integer objAsInt3 = dynamicCast(Integer.class, obj);
+        Integer objAsInt4 = castInOptional(obj);
+
+        assertThat(objAsInt1, is(objAsInt2));
+        assertThat(objAsInt1, is(objAsInt3));
+        assertThat(objAsInt1, is(objAsInt4));
+    }
+
+    private Integer staticCast1(Object obj) {
+        return obj instanceof Integer ? (Integer) obj : null;
+    }
+
+    private Integer staticCast2(Object obj) {
+        return Integer.class.isInstance(obj) ? Integer.class.cast(obj) : null;
+    }
+
+    private <T> T dynamicCast(Class<T> type, Object obj) {
+        return type.isInstance(obj) ? type.cast(obj) : null;
+    }
+
+    private Integer castInOptional(Object obj) {
+        Optional<?> objOpt = Optional.of(obj);
+        Optional<Integer> objAsIntOpt = objOpt
+                .filter(Integer.class::isInstance).map(Integer.class::cast);
+
+        return objAsIntOpt.isPresent() ? objAsIntOpt.get() : null;
+    }
+
+    @Test
     public void testJoinString() {
 
         final String expected = "aaa,bbb";
