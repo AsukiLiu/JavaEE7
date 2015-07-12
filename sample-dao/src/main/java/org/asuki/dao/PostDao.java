@@ -46,4 +46,16 @@ public class PostDao extends BaseDao<Post, Long> {
         log.info("Deleted number: " + number);
     }
 
+    @SuppressWarnings("unchecked")
+    public List<Post> listPostsByPage(int recordPosition,
+            int recordsPerRoundTrip) {
+        return em.createNamedQuery("Post.listAll")
+                .setFirstResult(recordPosition)
+                .setMaxResults(recordsPerRoundTrip).getResultList();
+    }
+
+    public int countRecords() {
+        return em.createNamedQuery("Post.countRecords", Long.class)
+                .getSingleResult().intValue();
+    }
 }

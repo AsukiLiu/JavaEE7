@@ -13,9 +13,9 @@ public class VetoExtension implements Extension {
     private Logger log = LoggerFactory.getLogger(getClass());
 
     public void vetoEntities(@Observes ProcessAnnotatedType<?> pat) {
-        if (pat.getAnnotatedType().getAnnotation(Entity.class) != null) {
-            pat.veto();
-            log.info("Vetoed class: " + pat.getAnnotatedType().getJavaClass());
-        }
+//        if (pat.getAnnotatedType().getAnnotation(Entity.class) != null) {
+//            pat.veto();
+//            log.info("Vetoed class: " + pat.getAnnotatedType().getJavaClass());
+//        }
     }
 }

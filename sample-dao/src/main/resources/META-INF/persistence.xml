@@ -7,6 +7,12 @@
 
         <jta-data-source>java:jboss/datasources/test7</jta-data-source>
 
+        <class>org.asuki.model.entity.Comment</class>
+        <class>org.asuki.model.entity.CommentNegative</class>
+        <class>org.asuki.model.entity.CommentPositive</class>
+        <class>org.asuki.model.entity.Post</class>
+        <class>org.asuki.model.entity.User</class>
+
         <properties>
             <property
                 name="javax.persistence.schema-generation.database.action"

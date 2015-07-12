@@ -15,7 +15,7 @@ import javax.transaction.Transactional;
 public abstract class BaseDao<E, K> {
 
     @PersistenceContext
-    private EntityManager em;
+    protected EntityManager em;
 
     protected abstract Class<E> getEntityClass();
 

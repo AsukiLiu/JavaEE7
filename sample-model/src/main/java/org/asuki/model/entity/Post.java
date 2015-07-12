@@ -11,6 +11,8 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -34,6 +36,9 @@ import lombok.experimental.Wither;
 @ToString
 @EqualsAndHashCode(callSuper = false)
 @Wither
+@NamedQueries({
+        @NamedQuery(name = "Post.listAll", query = "SELECT p FROM Post p"),
+        @NamedQuery(name = "Post.countRecords", query = "SELECT COUNT(p) FROM Post p") })
 @NamedEntityGraph(name = "post", attributeNodes = {
         @NamedAttributeNode("title"),
         @NamedAttributeNode(value = "comments", subgraph = "comments") }, subgraphs = { @NamedSubgraph(name = "comments", attributeNodes = { @NamedAttributeNode("content") }) })
