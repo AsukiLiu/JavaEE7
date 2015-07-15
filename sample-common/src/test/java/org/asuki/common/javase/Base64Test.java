@@ -4,7 +4,6 @@ import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static com.google.common.io.BaseEncoding.base64;
 import static com.google.common.io.BaseEncoding.base64Url;
-import static java.lang.System.out;
 import static java.util.Base64.getDecoder;
 import static java.util.Base64.getEncoder;
 import static java.util.Base64.getMimeEncoder;
@@ -13,24 +12,34 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.apache.commons.codec.binary.Base64.encodeBase64Chunked;
 import static org.apache.commons.codec.binary.Base64.encodeBase64URLSafe;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import org.testng.annotations.Test;
 
+import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
+
 public class Base64Test {
     private static final String TEXT = "test";
 
+    @SuppressWarnings("restriction")
     @Test
-    public void testBasic() {
+    public void testBasic() throws IOException {
 
-        String encoded = getEncoder().encodeToString(
+        String encoded = (new BASE64Encoder()).encodeBuffer(TEXT.getBytes());
+        String java8Encoded = getEncoder().encodeToString(
                 TEXT.getBytes(StandardCharsets.UTF_8));
-        out.println(encoded);
 
-        String decoded = new String(getDecoder().decode(encoded),
+        assertThat(encoded, is(java8Encoded + "\n"));
+
+        String decoded = new String((new BASE64Decoder()).decodeBuffer(encoded));
+        String java8Decoded = new String(getDecoder().decode(java8Encoded),
                 StandardCharsets.UTF_8);
+
         assertThat(decoded, is(TEXT));
+        assertThat(java8Decoded, is(TEXT));
     }
 
     @Test
