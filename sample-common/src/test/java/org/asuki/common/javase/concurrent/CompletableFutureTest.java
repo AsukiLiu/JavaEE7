@@ -7,10 +7,13 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.common.base.Stopwatch;
 
 public class CompletableFutureTest {
 
@@ -19,6 +22,33 @@ public class CompletableFutureTest {
     @BeforeMethod
     public void setUp() {
         list = asList("A", "B", "C", "D");
+    }
+
+    @Test
+    public void testLazyinstantiate() {
+        Stopwatch sw = Stopwatch.createStarted();
+
+        CompletableFuture<String> future = supplyAsync(longRunningTask());
+
+        out.println(future.join());
+        out.println(sw.elapsed(TimeUnit.SECONDS));
+
+        sw.reset();
+        sw.start();
+
+        out.println(future.join());
+        out.println(sw.elapsed(TimeUnit.SECONDS));
+    }
+
+    private static Supplier<String> longRunningTask() {
+        return () -> {
+            try {
+                TimeUnit.SECONDS.sleep(2);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            return "result";
+        };
     }
 
     @Test

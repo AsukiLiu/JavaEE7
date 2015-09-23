@@ -278,10 +278,18 @@ public class BasicTest {
         assertThat(optional.flatMap(s -> Optional.of(s.toUpperCase())).orElse("none"), is("ABC"));
         assertThat(optional.filter(s -> s.length() > 5).orElse("none"), is("none"));
 
+        optional.ifPresent(s -> out.println(s));
+
         optional = Optional.ofNullable(null);
 
         assertThat(optional.isPresent(), is(false));
         assertThat(optional.orElseGet(() -> "none"), is("none"));
+
+        try {
+            optional.orElseThrow(NullPointerException::new);
+        } catch (Exception e) {
+            out.println(e);
+        }
     }
 
     @Test
