@@ -4,6 +4,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.lang.System.out;
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.summingInt;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
@@ -584,6 +586,26 @@ public class StreamTest {
         // @formatter:on
 
         out.println(result);
+    }
+
+    @Test
+    public void testExample2() {
+        int[] array = { 5, 5, 6, 7, 8, 8, 8, 8, 9 };
+
+        IntStream.of(array)
+                .boxed()                        // Stream<Integer>
+                .collect(groupingBy(i -> i))    // Map<Integer, List<Integer>>
+                .entrySet()                     // Set<Entry<Integer, List<Integer>>>
+                .stream()
+                .filter(e -> e.getValue().size() > 1)
+                .forEach(
+                        e -> {
+                            out.println(format(
+                                    "Duplicate:%s, Sum:%s",
+                                    e.getKey(),
+                                    e.getValue().stream()
+                                            .collect(summingInt(i -> i))));
+                        });
     }
 
     @ToString
