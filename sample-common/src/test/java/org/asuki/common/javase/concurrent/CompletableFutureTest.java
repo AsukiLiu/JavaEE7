@@ -6,7 +6,9 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -106,6 +108,32 @@ public class CompletableFutureTest {
                 r2) -> System.out.println(r1 + r2 + 10)); // 40 + 20 + 10
 
         System.out.println(future5.get()); // null
+    }
+
+    @Test
+    public void testException() {
+
+        Function<Throwable, ? extends Object> exceptFn = t -> {
+            t.printStackTrace();
+            throw new CompletionException(t);
+        };
+
+        CompletableFuture<Object> future1 = new CompletableFuture<>();
+        future1.completeExceptionally(new RuntimeException());
+        System.out.println("future1:");
+        future1.exceptionally(exceptFn);
+
+        CompletableFuture<Object> future2 = supplyAsync(() -> {
+            throw new RuntimeException();
+        });
+        System.out.println("future2:");
+        future2.exceptionally(exceptFn);
+
+        CompletableFuture<String> future3 = supplyAsync(() -> "test");
+        System.out.println("future3:");
+        future3.thenApply(t -> {
+            throw new RuntimeException();
+        }).exceptionally(exceptFn);
     }
 
     @Test
