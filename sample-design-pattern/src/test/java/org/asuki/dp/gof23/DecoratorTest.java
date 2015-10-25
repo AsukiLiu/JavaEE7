@@ -1,36 +1,31 @@
 package org.asuki.dp.gof23;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
 import org.asuki.dp.gof23.Decorator.Animal;
 import org.asuki.dp.gof23.Decorator.Rat;
 import org.asuki.dp.gof23.Decorator.AnimalDecorator;
 import org.asuki.dp.gof23.Decorator.FlyFeature;
 import org.asuki.dp.gof23.Decorator.DigFeature;
-import org.asuki.dp.gof23.Decorator.BaseDecorator;
 import org.asuki.dp.gof23.Decorator.Component;
 import org.asuki.dp.gof23.Decorator.OriginalComponent;
-import org.asuki.dp.gof23.Decorator.ConcreteDecoratorA;
-import org.asuki.dp.gof23.Decorator.ConcreteDecoratorB;
+import org.asuki.dp.gof23.Decorator.TrimDecorator;
+import org.asuki.dp.gof23.Decorator.CaseDecorator;
 import org.testng.annotations.Test;
 
 public class DecoratorTest {
 
     @Test
     public void testNormalVersion() {
-        Component com = new OriginalComponent();
-        BaseDecorator decoratorA = new ConcreteDecoratorA();
-        BaseDecorator decoratorB = new ConcreteDecoratorB();
+        // @formatter:off
+        Component com = 
+                new TrimDecorator(
+                        new CaseDecorator(
+                                new OriginalComponent()));
+        // @formatter:on
 
-        decoratorA.setCom(com);
-        decoratorB.setCom(decoratorA);
-
-        decoratorB.operation();
-
-        // OR
-
-        com = new ConcreteDecoratorA(new ConcreteDecoratorB(
-                new OriginalComponent()));
-
-        com.operation();
+        assertThat(com.operation(" abc "), is("ABC"));
     }
 
     @Test

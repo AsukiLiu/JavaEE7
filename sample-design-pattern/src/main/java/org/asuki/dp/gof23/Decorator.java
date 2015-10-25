@@ -15,67 +15,45 @@ public class Decorator {
      */
 
     interface Component {
-        void operation();
+        String operation(String input);
     }
 
     static class OriginalComponent implements Component {
         @Override
-        public void operation() {
-            out.println(this.getClass().getSimpleName());
+        public String operation(String input) {
+            return input;
         }
     }
 
     static abstract class BaseDecorator implements Component {
         protected Component com;
 
-        public BaseDecorator() {
-        }
-
         public BaseDecorator(Component com) {
             this.com = com;
         }
-
-        public void setCom(Component com) {
-            this.com = com;
-        }
-
-        @Override
-        public void operation() {
-            if (com != null) {
-                com.operation();
-            }
-        }
     }
 
-    static class ConcreteDecoratorA extends BaseDecorator {
+    static class TrimDecorator extends BaseDecorator {
 
-        public ConcreteDecoratorA() {
-        }
-
-        public ConcreteDecoratorA(Component com) {
+        public TrimDecorator(Component com) {
             super(com);
         }
 
         @Override
-        public void operation() {
-            super.operation();
-            out.println(this.getClass().getSimpleName());
+        public String operation(String input) {
+            return this.com.operation(input).trim();
         }
     }
 
-    static class ConcreteDecoratorB extends BaseDecorator {
+    static class CaseDecorator extends BaseDecorator {
 
-        public ConcreteDecoratorB() {
-        }
-
-        public ConcreteDecoratorB(Component com) {
+        public CaseDecorator(Component com) {
             super(com);
         }
 
         @Override
-        public void operation() {
-            super.operation();
-            out.println(this.getClass().getSimpleName());
+        public String operation(String input) {
+            return this.com.operation(input).toUpperCase();
         }
     }
 
