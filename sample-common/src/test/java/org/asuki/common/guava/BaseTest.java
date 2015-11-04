@@ -31,7 +31,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +70,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Ordering;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import com.google.common.io.Flushables;
@@ -485,56 +483,6 @@ public class BaseTest {
         }
 
         fail("No exception happened!");
-    }
-
-    @SuppressWarnings("static-access")
-    @Test
-    public void testOrdering() {
-        Ordering<String> byLengthOrdering = new Ordering<String>() {
-            @Override
-            public int compare(String left, String right) {
-                return Ints.compare(left.length(), right.length());
-            }
-        };
-
-        List<String> list = Lists.newArrayList("a", "aa", "aaa");
-
-        assertEquals(byLengthOrdering.isOrdered(list), true);
-        assertEquals(byLengthOrdering.reverse().isOrdered(list), false);
-
-        List<Double> numbers = Lists.newArrayList(0.2, 0.3, 0.1);
-
-        Ordering<Double> digitOrdering = new Ordering<Double>() {
-            @Override
-            public int compare(Double left, Double right) {
-                return Doubles.compare(left, right);
-            }
-        };
-
-        Comparator<Double> comparator = new Comparator<Double>() {
-            @Override
-            public int compare(Double o1, Double o2) {
-                return Doubles.compare(1 / o1, 1 / o2);
-            }
-        };
-
-        assertEquals(byLengthOrdering.from(comparator).isOrdered(numbers),
-                false);
-
-        assertEquals(digitOrdering.sortedCopy(numbers).toString(),
-                "[0.1, 0.2, 0.3]");
-        assertEquals(digitOrdering.reverse().sortedCopy(numbers).toString(),
-                "[0.3, 0.2, 0.1]");
-        assertEquals(digitOrdering.from(comparator).sortedCopy(numbers)
-                .toString(), "[0.3, 0.2, 0.1]");
-
-        assertEquals(
-                digitOrdering.reverse().explicit(numbers).sortedCopy(numbers)
-                        .toString(), "[0.2, 0.3, 0.1]");
-
-        assertEquals(
-                digitOrdering.reverse().compound(comparator)
-                        .sortedCopy(numbers).toString(), "[0.3, 0.2, 0.1]");
     }
 
     /* IO */
