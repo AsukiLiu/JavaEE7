@@ -16,7 +16,6 @@
         <module>sample-test</module>
         <module>sample-dao</module>
         <module>sample-model</module>
-        <module>sample-design-pattern</module>
     </modules>
 
     <properties>
