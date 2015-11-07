@@ -16,8 +16,8 @@ import javax.crypto.KeyGenerator;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import sun.security.tools.keytool.CertAndKeyGen;
-import sun.security.x509.X500Name;
+//import sun.security.tools.keytool.CertAndKeyGen;
+//import sun.security.x509.X500Name;
 
 @SuppressWarnings("restriction")
 public class KeyStoreTest {
@@ -68,22 +68,22 @@ public class KeyStoreTest {
 
         // Store private key
         {
-            KeyStore keyStore = KeyStore.getInstance(keystoreType);
-            keyStore.load(new FileInputStream(outputFile),
-                    PASSWORD.toCharArray());
-
-            CertAndKeyGen gen = new CertAndKeyGen("RSA", "SHA1WithRSA");
-            gen.generate(1024);
-
-            Key key = gen.getPrivateKey();
-            X509Certificate cert = gen.getSelfCertificate(new X500Name(
-                    "CN=ROOT"), CERTIFICATE_EXPIRY);
-            X509Certificate[] chain = { cert };
-
-            keyStore.setKeyEntry(ALIAS, key, PASSWORD.toCharArray(), chain);
-
-            keyStore.store(new FileOutputStream(outputFile),
-                    PASSWORD.toCharArray());
+//            KeyStore keyStore = KeyStore.getInstance(keystoreType);
+//            keyStore.load(new FileInputStream(outputFile),
+//                    PASSWORD.toCharArray());
+//
+//            CertAndKeyGen gen = new CertAndKeyGen("RSA", "SHA1WithRSA");
+//            gen.generate(1024);
+//
+//            Key key = gen.getPrivateKey();
+//            X509Certificate cert = gen.getSelfCertificate(new X500Name(
+//                    "CN=ROOT"), CERTIFICATE_EXPIRY);
+//            X509Certificate[] chain = { cert };
+//
+//            keyStore.setKeyEntry(ALIAS, key, PASSWORD.toCharArray(), chain);
+//
+//            keyStore.store(new FileOutputStream(outputFile),
+//                    PASSWORD.toCharArray());
         }
 
         // Load private key
@@ -115,20 +115,20 @@ public class KeyStoreTest {
 
         // Store certificate
         {
-            KeyStore keyStore = KeyStore.getInstance(keystoreType);
-            keyStore.load(new FileInputStream(outputFile),
-                    PASSWORD.toCharArray());
-
-            CertAndKeyGen gen = new CertAndKeyGen("RSA", "SHA1WithRSA");
-            gen.generate(1024);
-
-            X509Certificate cert = gen.getSelfCertificate(new X500Name(
-                    "CN=SINGLE_CERTIFICATE"), CERTIFICATE_EXPIRY);
-
-            keyStore.setCertificateEntry(ALIAS, cert);
-
-            keyStore.store(new FileOutputStream(outputFile),
-                    PASSWORD.toCharArray());
+//            KeyStore keyStore = KeyStore.getInstance(keystoreType);
+//            keyStore.load(new FileInputStream(outputFile),
+//                    PASSWORD.toCharArray());
+//
+//            CertAndKeyGen gen = new CertAndKeyGen("RSA", "SHA1WithRSA");
+//            gen.generate(1024);
+//
+//            X509Certificate cert = gen.getSelfCertificate(new X500Name(
+//                    "CN=SINGLE_CERTIFICATE"), CERTIFICATE_EXPIRY);
+//
+//            keyStore.setCertificateEntry(ALIAS, cert);
+//
+//            keyStore.store(new FileOutputStream(outputFile),
+//                    PASSWORD.toCharArray());
         }
 
         // Load certificate
