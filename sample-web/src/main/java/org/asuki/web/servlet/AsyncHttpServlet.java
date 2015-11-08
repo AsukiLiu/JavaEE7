@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.concurrent.TimeUnit;
 
+import javax.ejb.EJB;
 import javax.inject.Inject;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletConfig;
@@ -33,7 +34,7 @@ public class AsyncHttpServlet extends HttpServlet {
     @Inject
     private Logger log;
 
-    @Inject
+    @EJB
     private AsyncService asyncService;
 
     @Override

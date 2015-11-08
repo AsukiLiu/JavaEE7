@@ -131,8 +131,9 @@
                                 <targetPath>WEB-INF</targetPath>
                             </resource>
                         </webResources>
-                        <archiveClasses>true</archiveClasses>
-                        <attachClasses>true</attachClasses>
+                        <!-- NOTE: unsatisfied dependencies(CDI) -->
+                        <!--<archiveClasses>true</archiveClasses>-->
+                        <!--<attachClasses>true</attachClasses>-->
                     </configuration>
                 </plugin>
                 <!-- Unit test -->
